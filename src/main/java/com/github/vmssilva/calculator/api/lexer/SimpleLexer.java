@@ -1,10 +1,10 @@
-package com.github.vmssilva.calculator.lexer;
+package com.github.vmssilva.calculator.api.lexer;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import com.github.vmssilva.calculator.token.Token;
-import com.github.vmssilva.calculator.token.TokenType;
+import com.github.vmssilva.calculator.api.token.Token;
+import com.github.vmssilva.calculator.api.token.TokenType;
 
 public final class SimpleLexer implements Lexer {
 

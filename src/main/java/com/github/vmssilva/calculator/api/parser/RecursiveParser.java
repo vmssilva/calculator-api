@@ -1,15 +1,15 @@
-package com.github.vmssilva.calculator.parser;
+package com.github.vmssilva.calculator.api.parser;
 
 import java.util.List;
 
-import com.github.vmssilva.calculator.ast.BinaryExpression;
-import com.github.vmssilva.calculator.ast.Expression;
-import com.github.vmssilva.calculator.ast.NumberExpression;
-import com.github.vmssilva.calculator.ast.UnaryExpression;
-import com.github.vmssilva.calculator.lexer.Lexer;
-import com.github.vmssilva.calculator.lexer.SimpleLexer;
-import com.github.vmssilva.calculator.token.Token;
-import com.github.vmssilva.calculator.token.TokenType;
+import com.github.vmssilva.calculator.api.ast.BinaryExpression;
+import com.github.vmssilva.calculator.api.ast.Expression;
+import com.github.vmssilva.calculator.api.ast.NumberExpression;
+import com.github.vmssilva.calculator.api.ast.UnaryExpression;
+import com.github.vmssilva.calculator.api.lexer.Lexer;
+import com.github.vmssilva.calculator.api.lexer.SimpleLexer;
+import com.github.vmssilva.calculator.api.token.Token;
+import com.github.vmssilva.calculator.api.token.TokenType;
 
 public final class RecursiveParser implements Parser {
 

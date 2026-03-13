@@ -1,4 +1,4 @@
-package com.github.vmssilva.calculator;
+package com.github.vmssilva.calculator.api;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 

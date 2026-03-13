@@ -1,4 +1,4 @@
-package com.github.vmssilva.calculator.ast;
+package com.github.vmssilva.calculator.api.ast;
 
 public record NumberExpression(Double value) implements Expression {
 

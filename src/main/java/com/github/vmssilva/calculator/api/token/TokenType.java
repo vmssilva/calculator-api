@@ -1,4 +1,4 @@
-package com.github.vmssilva.calculator.token;
+package com.github.vmssilva.calculator.api.token;
 
 public enum TokenType {
   NUMBER,

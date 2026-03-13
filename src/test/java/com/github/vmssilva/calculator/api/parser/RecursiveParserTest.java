@@ -1,4 +1,4 @@
-package com.github.vmssilva.calculator.parser;
+package com.github.vmssilva.calculator.api.parser;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -7,9 +7,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import com.github.vmssilva.calculator.ast.Expression;
-import com.github.vmssilva.calculator.lexer.Lexer;
-import com.github.vmssilva.calculator.lexer.SimpleLexer;
+import com.github.vmssilva.calculator.api.ast.Expression;
+import com.github.vmssilva.calculator.api.lexer.Lexer;
+import com.github.vmssilva.calculator.api.lexer.SimpleLexer;
 
 class RecursiveParserTest {
 
