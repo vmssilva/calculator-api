@@ -104,7 +104,7 @@ public final class SimpleLexer implements Lexer {
         advance();
       }
 
-      if (isAtEnd() && !isDigit(peek()))
+      if (!isAtEnd() && peek() == '.')
         throw new NumberFormatException("Invalid number format");
 
     }
@@ -126,6 +126,10 @@ public final class SimpleLexer implements Lexer {
 
   private char peekNext() {
     return (current + 1 < expression.length()) ? expression.charAt(current + 1) : '\0';
+  }
+
+  private char peekPrevious() {
+    return (current - 1 >= 0) ? expression.charAt(current - 1) : '\0';
   }
 
   private char advance() {

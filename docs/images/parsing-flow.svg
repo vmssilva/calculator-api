@@ -1,0 +1,30 @@
+<svg width="650" height="360" xmlns="http://www.w3.org/2000/svg">
+<style>
+.box{fill:#263238;stroke:#546e7a;stroke-width:2;rx:8}
+.text{fill:#eceff1;font-family:monospace;font-size:15}
+.arrow{stroke:#90caf9;stroke-width:2;marker-end:url(#arrow)}
+</style>
+
+<defs>
+<marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+<polygon points="0 0, 10 3, 0 6" fill="#90caf9"></polygon>
+</marker>
+</defs>
+
+<rect class="box" x="240" y="30" width="170" height="50"></rect>
+<text class="text" x="265" y="60">parseExpression()</text>
+
+<rect class="box" x="240" y="120" width="170" height="50"></rect>
+<text class="text" x="280" y="150">parseTerm()</text>
+
+<rect class="box" x="240" y="210" width="170" height="50"></rect>
+<text class="text" x="275" y="240">parseFactor()</text>
+
+<rect class="box" x="240" y="300" width="170" height="50"></rect>
+<text class="text" x="280" y="330">Number</text>
+
+<line class="arrow" x1="325" y1="80" x2="325" y2="120"></line>
+<line class="arrow" x1="325" y1="170" x2="325" y2="210"></line>
+<line class="arrow" x1="325" y1="260" x2="325" y2="300"></line>
+
+</svg>

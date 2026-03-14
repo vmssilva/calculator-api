@@ -11,14 +11,14 @@ import com.github.vmssilva.calculator.api.ast.Expression;
 import com.github.vmssilva.calculator.api.lexer.Lexer;
 import com.github.vmssilva.calculator.api.lexer.SimpleLexer;
 
-class RecursiveParserTest {
+class RecursiveAstParserTest {
 
   private Parser parser;
 
   @BeforeEach
   void setup() {
     Lexer lexer = new SimpleLexer();
-    parser = new RecursiveParser(lexer);
+    parser = new RecursiveAstParser(lexer);
   }
 
   private Double eval(String expr) {
@@ -147,9 +147,32 @@ class RecursiveParserTest {
   }
 
   @Test
+  @DisplayName("Single number")
+  void testSingleNumber() {
+    assertEquals(3.0, eval("3"));
+  }
+
+  @Test
+  @DisplayName("Single decimal-point number")
+  void testSingleDecimalPointNumber() {
+    assertEquals(0.5, eval("0.5"));
+    assertEquals(3.1, eval("3.1"));
+    assertEquals(3.50, eval("3.50"));
+  }
+
+  @Test
   @DisplayName("Simple parentheses around a number")
   void testSingleNumberParentheses() {
     assertEquals(3.0, eval("(3)"));
+    assertEquals(35.0, eval("(35)"));
+  }
+
+  @Test
+  @DisplayName("Simple parentheses around a decimal-point number")
+  void testSingleDecimalPointNumberParentheses() {
+    assertEquals(3.5, eval("(3.5)"));
+    assertEquals(0.2, eval("(0.2)"));
+    assertEquals(0.25, eval("(0.25)"));
   }
 
   @Test

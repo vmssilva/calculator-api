@@ -1,0 +1,59 @@
+<svg width="900" height="240" xmlns="http://www.w3.org/2000/svg">
+
+<style>
+.box{fill:#263238;stroke:#546e7a;stroke-width:2;rx:10}
+.text{fill:#eceff1;font-family:monospace;font-size:15}
+.arrow{stroke:#90caf9;stroke-width:2;marker-end:url(#arrow)}
+.title{fill:#81d4fa;font-family:monospace;font-size:16}
+</style>
+
+<defs>
+<marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+<polygon points="0 0, 10 3, 0 6" fill="#90caf9"></polygon>
+</marker>
+</defs>
+
+<!-- Input -->
+
+<rect class="box" x="30" y="90" width="140" height="60"></rect>
+<text class="text" x="55" y="120">Input String</text>
+
+<!-- Lexer -->
+
+<rect class="box" x="210" y="90" width="160" height="60"></rect>
+<text class="text" x="245" y="115">Lexer</text>
+<text class="text" x="220" y="135">(SimpleLexer)</text>
+
+<!-- Tokens -->
+
+<rect class="box" x="410" y="90" width="150" height="60"></rect>
+<text class="text" x="435" y="115">Token List</text>
+<text class="text" x="425" y="135">List&lt;Token&gt;</text>
+
+<!-- Parser -->
+
+<rect class="box" x="600" y="90" width="170" height="60"></rect>
+<text class="text" x="630" y="115">Parser</text>
+<text class="text" x="610" y="135">(RecursiveParser)</text>
+
+<!-- AST -->
+
+<rect class="box" x="810" y="90" width="140" height="60"></rect>
+<text class="text" x="840" y="115">AST</text>
+<text class="text" x="820" y="135">Expression</text>
+
+<!-- arrows -->
+
+<line class="arrow" x1="170" y1="120" x2="210" y2="120"></line>
+<line class="arrow" x1="370" y1="120" x2="410" y2="120"></line>
+<line class="arrow" x1="560" y1="120" x2="600" y2="120"></line>
+<line class="arrow" x1="770" y1="120" x2="810" y2="120"></line>
+
+<!-- interpreter -->
+
+<rect class="box" x="390" y="190" width="200" height="40"></rect>
+<text class="text" x="420" y="215">Expression.interpret()</text>
+
+<line class="arrow" x1="880" y1="150" x2="490" y2="190"></line>
+
+</svg>
