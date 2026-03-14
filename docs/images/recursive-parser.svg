@@ -1,0 +1,26 @@
+<svg width="700" height="250" xmlns="http://www.w3.org/2000/svg">
+<style>
+.box{fill:#263238;stroke:#546e7a;stroke-width:2;rx:8}
+.text{fill:#eceff1;font-family:monospace;font-size:15}
+.arrow{stroke:#90caf9;stroke-width:2;marker-end:url(#arrow)}
+</style>
+
+<defs>
+<marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+<polygon points="0 0, 10 3, 0 6" fill="#90caf9"></polygon>
+</marker>
+</defs>
+
+<rect class="box" x="60" y="100" width="180" height="60"></rect>
+<text class="text" x="95" y="130">RecursiveAstParser</text>
+
+<rect class="box" x="300" y="100" width="150" height="60"></rect>
+<text class="text" x="330" y="130">Expression</text>
+
+<rect class="box" x="520" y="100" width="120" height="60"></rect>
+<text class="text" x="550" y="130">Result</text>
+
+<line class="arrow" x1="240" y1="130" x2="300" y2="130"></line>
+<line class="arrow" x1="450" y1="130" x2="520" y2="130"></line>
+
+</svg>

@@ -11,17 +11,17 @@ import com.github.vmssilva.calculator.api.lexer.SimpleLexer;
 import com.github.vmssilva.calculator.api.token.Token;
 import com.github.vmssilva.calculator.api.token.TokenType;
 
-public final class RecursiveParser implements Parser {
+public final class RecursiveAstParser implements Parser {
 
   private final Lexer lexer;
   private List<Token> tokens;
   private int pos = 0;
 
-  public RecursiveParser() {
+  public RecursiveAstParser() {
     this.lexer = new SimpleLexer();
   }
 
-  public RecursiveParser(Lexer lexer) {
+  public RecursiveAstParser(Lexer lexer) {
     this.lexer = lexer;
   }
 

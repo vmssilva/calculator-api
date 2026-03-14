@@ -1,0 +1,22 @@
+<svg width="700" height="180" xmlns="http://www.w3.org/2000/svg">
+<style>
+.token{fill:#37474f;stroke:#90a4ae;stroke-width:2;rx:6}
+.text{fill:#eceff1;font-family:monospace;font-size:14}
+</style>
+
+<rect class="token" x="40" y="70" width="80" height="40"></rect>
+<text class="text" x="60" y="95">NUMBER</text>
+
+<rect class="token" x="150" y="70" width="60" height="40"></rect>
+<text class="text" x="165" y="95">+</text>
+
+<rect class="token" x="240" y="70" width="80" height="40"></rect>
+<text class="text" x="260" y="95">NUMBER</text>
+
+<rect class="token" x="350" y="70" width="60" height="40"></rect>
+<text class="text" x="365" y="95">*</text>
+
+<rect class="token" x="440" y="70" width="80" height="40"></rect>
+<text class="text" x="460" y="95">NUMBER</text>
+
+</svg>

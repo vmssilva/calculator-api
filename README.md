@@ -15,17 +15,21 @@ This project supports:
 
 ## 📦 Architecture
 
+![Architecture](docs/images/architecture.svg)
+
 ```
+
 Input String
-   │
-   ▼
+│
+▼
 Lexer (tokenizes input) → List<Token>
-   │
-   ▼
+│
+▼
 Parser (RecursiveParser) → AST (Expression)
-   │
-   ▼
+│
+▼
 Expression.interpret() → Double
+
 ```
 
 ### Key Components:
@@ -41,6 +45,94 @@ Expression.interpret() → Double
   * `NumberExpression` → represents a literal number
   * `BinaryExpression` → represents binary operations (`+ - * / %`)
   * `UnaryExpression` → represents unary operations (`+ -`)
+
+---
+
+## 🌳 AST Structure
+
+The parser generates an Abstract Syntax Tree composed of different expression types.
+
+![AST Class Diagram](docs/images/ast-class-diagram.svg)
+
+---
+## 🔎 Expression Evaluation Pipeline
+
+![Expression Pipeline](docs/images/expression-pipeline.svg)
+
+The evaluation process follows these stages:
+
+1. Raw input string
+2. Tokenization
+3. Recursive parsing
+4. AST construction
+5. AST interpretation
+
+---
+
+## 🧩 Tokenization Example
+
+For the expression:
+
+```
+
+2 + 3 * 4
+
+```
+
+The lexer produces a token stream similar to:
+
+![Token Stream](docs/images/token-stream.svg)
+
+---
+
+## 🌳 AST Example
+
+Expression:
+
+```
+
+5(2+3)
+
+```
+
+Implicit multiplication converts it internally to:
+
+```
+
+5 * (2 + 3)
+
+```
+
+AST representation:
+
+![AST Tree](docs/images/ast-tree.svg)
+
+Evaluation order:
+
+```
+
+2 + 3 = 5
+5 * 5 = 25
+
+```
+
+---
+
+## 🔁 Recursive Parsing Flow
+
+The recursive descent parser processes expressions using this hierarchy:
+
+![Parsing Flow](docs/images/parsing-flow.svg)
+
+Grammar approximation:
+
+```
+
+expression -> term ((+|-) term)*
+term       -> factor ((*|/|%) factor)*
+factor     -> NUMBER | '(' expression ')'
+
+```
 
 ---
 
