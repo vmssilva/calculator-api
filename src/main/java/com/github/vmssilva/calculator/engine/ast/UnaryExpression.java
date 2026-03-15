@@ -1,4 +1,4 @@
-package com.github.vmssilva.calculator.api.ast;
+package com.github.vmssilva.calculator.engine.ast;
 
 public record UnaryExpression(String operator, Expression right) implements Expression {
 

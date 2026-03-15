@@ -1,4 +1,4 @@
-package com.github.vmssilva.calculator.api.token;
+package com.github.vmssilva.calculator.engine.token;
 
 public record Token(TokenType type, String lexeme, Object literal) {
 

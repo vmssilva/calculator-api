@@ -1,10 +1,10 @@
-package com.github.vmssilva.calculator.api.lexer;
+package com.github.vmssilva.calculator.engine.lexer;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import com.github.vmssilva.calculator.api.token.Token;
-import com.github.vmssilva.calculator.api.token.TokenType;
+import com.github.vmssilva.calculator.engine.token.Token;
+import com.github.vmssilva.calculator.engine.token.TokenType;
 
 public final class SimpleLexer implements Lexer {
 
@@ -126,10 +126,6 @@ public final class SimpleLexer implements Lexer {
 
   private char peekNext() {
     return (current + 1 < expression.length()) ? expression.charAt(current + 1) : '\0';
-  }
-
-  private char peekPrevious() {
-    return (current - 1 >= 0) ? expression.charAt(current - 1) : '\0';
   }
 
   private char advance() {

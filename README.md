@@ -13,7 +13,7 @@ This project supports:
 
 ---
 
-## 📦 Architecture
+## Architecture
 
 ![Architecture](docs/images/architecture.svg)
 
@@ -25,7 +25,7 @@ Input String
 Lexer (tokenizes input) → List<Token>
 │
 ▼
-Parser (RecursiveParser) → AST (Expression)
+Parser (RecursiveAstParser) → AST (Expression)
 │
 ▼
 Expression.interpret() → Double
@@ -37,7 +37,7 @@ Expression.interpret() → Double
 * **Lexer (`SimpleLexer`)**
   Converts the input string into tokens (`NUMBER`, `PLUS`, `MINUS`, etc.).
 
-* **Parser (`RecursiveParser`)**
+* **Parser (`RecursiveAstParser`)**
   Builds an **AST** respecting operator precedence, parentheses, unary operators, and implicit multiplication.
 
 * **AST (`Expression`)**
@@ -48,14 +48,14 @@ Expression.interpret() → Double
 
 ---
 
-## 🌳 AST Structure
+## AST Structure
 
 The parser generates an Abstract Syntax Tree composed of different expression types.
 
 ![AST Class Diagram](docs/images/ast-class-diagram.svg)
 
 ---
-## 🔎 Expression Evaluation Pipeline
+## Expression Evaluation Pipeline
 
 ![Expression Pipeline](docs/images/expression-pipeline.svg)
 
@@ -69,7 +69,7 @@ The evaluation process follows these stages:
 
 ---
 
-## 🧩 Tokenization Example
+## Tokenization Example
 
 For the expression:
 
@@ -85,7 +85,7 @@ The lexer produces a token stream similar to:
 
 ---
 
-## 🌳 AST Example
+## AST Example
 
 Expression:
 
@@ -118,7 +118,7 @@ Evaluation order:
 
 ---
 
-## 🔁 Recursive Parsing Flow
+## Recursive Parsing Flow
 
 The recursive descent parser processes expressions using this hierarchy:
 
@@ -136,36 +136,36 @@ factor     -> NUMBER | '(' expression ')'
 
 ---
 
-## ⚙️ Installation
+## Installation
 
 This project is simple to run locally using **Java 17+**. You can compile and execute it from the command line, or import it into an IDE like **IntelliJ IDEA** or **Eclipse**.
 
-### 1️⃣ Clone the repository
+### Clone the repository
 
 ```bash
-git clone https://github.com/vmssilva/calculator-api.git
-cd calculator-api
+git clone https://github.com/vmssilva/calculator-engine.git
+cd calculator-engine
 ```
 
-### 2️⃣ Compile
+### Compile
 
 Using **javac**:
 
 ```bash
-javac -d out src/com/github/vmssilva/calculator/api/**/*.java
+            javac -d out src/com/github/vmssilva/calculator/engine/**/*.javaApp
 ```
 
 This will compile all Java files into the `out` directory.
 
-### 3️⃣ Run
+### Run
 
 ```bash
-java -cp out com.github.vmssilva.calculator.api.CalculatorApp
+java -cp out com.github.vmssilva.calculator.engine.CalculatorApp
 ```
 
 You should see the result of the expression(s) in the console.
 
-### 4️⃣ Run Tests
+### Run Tests
 
 The project uses **JUnit 5** for testing. If you have Maven or Gradle configured:
 
@@ -182,16 +182,16 @@ mvn test
 ---
 
 
-## 🛠 Usage Example
+## Usage Example
 
 ```java
-import com.github.vmssilva.calculator.api.parser.RecursiveParser;
-import com.github.vmssilva.calculator.api.ast.Expression;
+import com.github.vmssilva.calculator.engine.parser.RecursiveAstParser;
+import com.github.vmssilva.calculator.engine.ast.Expression;
 
 public class CalculatorApp {
     public static void main(String[] args) {
 
-        RecursiveParser parser = new RecursiveParser();
+        RecursiveAstParser parser = new RecursiveAstParser();
 
         Expression expr1 = parser.parse("1 + 2 * 3");
         System.out.println(expr1.interpret()); // 7.0
@@ -210,7 +210,7 @@ public class CalculatorApp {
 
 ---
 
-## ✅ Features
+## Features
 
 * Operator precedence correctly handled:
 
@@ -230,7 +230,7 @@ public class CalculatorApp {
 
 ---
 
-## 🧪 Testing
+## Testing
 
 The project includes a comprehensive JUnit 5 test suite, covering:
 
@@ -250,7 +250,7 @@ assertThrows(UnsupportedOperationException.class, () -> parser.parse("2++3"));
 
 ---
 
-## 💡 Notes
+## Notes
 
 * This project is **for study and experimentation**.
 * Future improvements could include:
@@ -262,14 +262,14 @@ assertThrows(UnsupportedOperationException.class, () -> parser.parse("2++3"));
 
 ---
 
-## ⚙️ Requirements
+## Requirements
 
 * Java 17+
 * JUnit 5 for running tests
 
 ---
 
-## 📝 Summary
+## Summary
 
 This project is a **learning exercise** to practice:
 
@@ -282,6 +282,6 @@ Perfect for anyone learning **compiler fundamentals** or **expression evaluation
 
 ---
 
-## 📄 License
+## License
 
 This project is licensed under the **MIT License** – see the [LICENSE](LICENSE) file for details.
