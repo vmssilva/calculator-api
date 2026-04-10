@@ -8,17 +8,14 @@ import com.github.vmssilva.calculator.engine.token.TokenType;
 
 public final class SimpleLexer implements Lexer {
 
-  private final List<Token> tokens;
+  private List<Token> tokens;
   private String expression;
   private int current = 0;
 
-  public SimpleLexer() {
-    this.tokens = new ArrayList<>();
-  }
-
   @Override
   public List<Token> tokenize(String source) {
-    this.expression = source.replaceAll("\s+", "");
+    this.tokens = new ArrayList<>();
+    this.expression = source;
     this.current = 0;
 
     while (current < expression.length()) {
@@ -30,44 +27,74 @@ public final class SimpleLexer implements Lexer {
   }
 
   private void scan(char c) {
+
+    if (String.valueOf(c).isBlank()) {
+      advance();
+      return;
+    }
+
     if (c == '(') {
-      addToken(TokenType.LPAREN, String.valueOf(c), c);
+      addToken(TokenType.LPAREN, String.valueOf(c));
       advance();
       return;
     }
 
     if (c == ')') {
-      addToken(TokenType.RPAREN, String.valueOf(c), c);
+      addToken(TokenType.RPAREN, String.valueOf(c));
       advance();
       return;
     }
 
     if (c == '+') {
-      addToken(TokenType.PLUS, String.valueOf(c), c);
+      addToken(TokenType.PLUS, String.valueOf(c));
       advance();
       return;
     }
 
     if (c == '-') {
-      addToken(TokenType.MINUS, String.valueOf(c), c);
+      addToken(TokenType.MINUS, String.valueOf(c));
       advance();
       return;
     }
 
     if (c == '*') {
-      addToken(TokenType.STAR, String.valueOf(c), c);
+      addToken(TokenType.STAR, String.valueOf(c));
       advance();
       return;
     }
 
     if (c == '/') {
-      addToken(TokenType.SLASH, String.valueOf(c), c);
+      addToken(TokenType.SLASH, String.valueOf(c));
       advance();
       return;
     }
 
     if (c == '%') {
-      addToken(TokenType.PERCENT, String.valueOf(c), c);
+      addToken(TokenType.PERCENT, String.valueOf(c));
+      advance();
+      return;
+    }
+
+    if (c == '=') {
+      addToken(TokenType.EQUAL, String.valueOf(c));
+      advance();
+      return;
+    }
+
+    if (c == '^') {
+      addToken(TokenType.CARET, String.valueOf(c));
+      advance();
+      return;
+    }
+
+    if (c == ',') {
+      addToken(TokenType.COMMA, String.valueOf(c));
+      advance();
+      return;
+    }
+
+    if (c == ';') {
+      addToken(TokenType.SEMICOLON, String.valueOf(c));
       advance();
       return;
     }
@@ -77,13 +104,17 @@ public final class SimpleLexer implements Lexer {
       return;
     }
 
+    if (isAlpha(c)) {
+      handleAlpha();
+      return;
+    }
+
     throw new NumberFormatException("Invalid character '" + c + "' at index: " + current);
 
   }
 
   private void handleDigit() {
     var value = new StringBuilder();
-    var isDouble = false;
 
     while (isDigit(peek())) {
       value.append(peek());
@@ -95,7 +126,6 @@ public final class SimpleLexer implements Lexer {
       if (!isDigit(peekNext()))
         throw new NumberFormatException("Invalid number format");
 
-      isDouble = true;
       value.append(peek());
       advance();
 
@@ -109,15 +139,21 @@ public final class SimpleLexer implements Lexer {
 
     }
 
-    if (isDouble) {
-      addToken(TokenType.NUMBER, value.toString(), Double.valueOf(value.toString()));
-    } else {
-      addToken(TokenType.NUMBER, value.toString(), Integer.valueOf(value.toString()));
-    }
+    addToken(TokenType.NUMBER, value.toString());
   }
 
-  private void addToken(TokenType type, String value, Object literal) {
-    tokens.add(new Token(type, value, literal));
+  private void handleAlpha() {
+    StringBuilder value = new StringBuilder();
+
+    while (isAlpha(peek()) || isDigit(peek()) || peek() == '_') {
+      value.append(advance());
+    }
+
+    addToken(TokenType.IDENTIFIER, value.toString());
+  }
+
+  private void addToken(TokenType type, String value) {
+    tokens.add(new Token(type, value));
   }
 
   private char peek() {
@@ -134,6 +170,10 @@ public final class SimpleLexer implements Lexer {
 
   private boolean isDigit(char c) {
     return Character.isDigit(c);
+  }
+
+  private boolean isAlpha(char c) {
+    return Character.isLetter(c);
   }
 
   private boolean isAtEnd() {
