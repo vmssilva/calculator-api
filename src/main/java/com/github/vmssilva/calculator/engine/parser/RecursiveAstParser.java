@@ -1,11 +1,19 @@
 package com.github.vmssilva.calculator.engine.parser;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
-import com.github.vmssilva.calculator.engine.ast.BinaryExpression;
-import com.github.vmssilva.calculator.engine.ast.Expression;
-import com.github.vmssilva.calculator.engine.ast.NumberExpression;
-import com.github.vmssilva.calculator.engine.ast.UnaryExpression;
+import javax.security.auth.callback.TextOutputCallback;
+
+import com.github.vmssilva.calculator.engine.ast.FunctionCallNode;
+import com.github.vmssilva.calculator.engine.ast.IdentifierNode;
+import com.github.vmssilva.calculator.engine.ast.Node;
+import com.github.vmssilva.calculator.engine.ast.ProgramNode;
+import com.github.vmssilva.calculator.engine.ast.VarNode;
+import com.github.vmssilva.calculator.engine.ast.expressions.BinaryExpression;
+import com.github.vmssilva.calculator.engine.ast.expressions.NumberExpression;
+import com.github.vmssilva.calculator.engine.ast.expressions.UnaryExpression;
 import com.github.vmssilva.calculator.engine.lexer.Lexer;
 import com.github.vmssilva.calculator.engine.lexer.SimpleLexer;
 import com.github.vmssilva.calculator.engine.token.Token;
@@ -25,93 +33,189 @@ public final class RecursiveAstParser implements Parser {
     this.lexer = lexer;
   }
 
-  public Expression parse(String expression) {
+  public Node parse(String expression) {
     this.tokens = lexer.tokenize(expression);
-    return expression();
+    this.pos = 0;
+
+    return parseProgram();
   }
 
-  private Expression expression() {
-    return expression(primary());
+  private Node parseProgram() {
+    List<Node> nodes = new ArrayList<>();
+
+    if (tokens.isEmpty())
+      error("Malformed expression", pos);
+
+    while (!isAstEnd()) {
+      nodes.add(primary());
+    }
+
+    return new ProgramNode(nodes);
   }
 
-  private Expression expression(Expression left) {
+  private Node primary() {
+    if (isAssignment()) {
+      var declaration = parseDeclaration();
 
-    Expression expr = left;
+      if (!isAstEnd()) {
+        expect(TokenType.SEMICOLON);
+        advance();
+      }
+      return declaration;
+    }
+
+    return parseExpression();
+  }
+
+  private Node parseDeclaration() {
+    var identifier = advance();
+    advance();
+    var expression = expression();
+
+    return new VarNode(identifier.value(), expression);
+  }
+
+  private Node parseExpression() {
+    var expression = expression();
+
+    if (!isAstEnd()) {
+      expect(TokenType.SEMICOLON);
+      advance();
+    }
+
+    return expression;
+  }
+
+  private Node parseCallFunction() {
+    List<Node> args = new ArrayList<>();
+
+    var identifier = advance();
+
+    expect(TokenType.LPAREN);
+    advance(); // LPAREN
+    args.add(expression());
+
+    while (match(TokenType.COMMA)) {
+      advance();
+      args.add(expression());
+    }
+
+    expect(TokenType.RPAREN);
+    advance();
+
+    return new FunctionCallNode(identifier.value(), args);
+  }
+
+  private Node parseIdentifier() {
+    return new IdentifierNode(advance().value());
+  }
+
+  private boolean isAssignment() {
+    return peek().type() == TokenType.IDENTIFIER && peekNext().type() == TokenType.EQUAL;
+  }
+
+  private boolean isFunction() {
+    return peek().type() == TokenType.IDENTIFIER && peekNext().type() == TokenType.LPAREN;
+  }
+
+  private Node expression() {
+
+    Node expr = term();
 
     while (match(TokenType.PLUS, TokenType.MINUS)) {
 
-      String operator = advance().lexeme();
+      String operator = advance().value();
 
-      if (!match(TokenType.NUMBER, TokenType.LPAREN)) {
-        throw new UnsupportedOperationException("Malformed expression: '" + peek() + "' at index: " + pos);
-      }
+      if (match(operators()))
+        error("Malformed expression", pos);
 
-      Expression right = primary();
-
+      Node right = term();
       expr = new BinaryExpression(expr, right, operator);
 
-    }
-
-    validateExpression();
-
-    return expr;
-  }
-
-  private Expression primary() {
-    Expression expr = factor();
-
-    while (match(TokenType.STAR, TokenType.SLASH, TokenType.PERCENT)) {
-      String operator = advance().lexeme();
-      Expression right = factor();
-      expr = new BinaryExpression(expr, right, operator);
     }
 
     return expr;
   }
 
-  private Expression factor() {
-    Expression expr = null;
+  private TokenType[] operators() {
+    return new TokenType[] { TokenType.PLUS, TokenType.MINUS, TokenType.STAR, TokenType.SLASH, TokenType.PERCENT,
+        TokenType.CARET };
+  }
+
+  private Node term() {
+    Node expr = factor();
+
+    while (match(TokenType.STAR, TokenType.SLASH, TokenType.PERCENT, TokenType.CARET)) {
+      var operator = advance().value();
+
+      if (match(operators()))
+        error("Malformed expression", pos);
+
+      Node right = expression();
+
+      expr = new BinaryExpression(expr, right, operator);
+    }
+
+    return expr;
+  }
+
+  private Node factor() {
+    Node expr = null;
 
     // Signed expressions
     if (match(TokenType.PLUS, TokenType.MINUS)) {
-      String operator = advance().lexeme();
-      Expression right = factor();
+      String operator = advance().value();
+      Node right = factor();
       expr = new UnaryExpression(operator, right);
+
+      return expr;
+    }
+
+    if (match(TokenType.IDENTIFIER)) {
+
+      if (isFunction())
+        return parseCallFunction();
+
+      if (isAssignment())
+        return parseDeclaration();
+
+      return parseIdentifier();
     }
 
     if (match(TokenType.NUMBER)) {
       Token token = advance();
-      Double value = Double.valueOf(token.lexeme());
+      var value = new BigDecimal(token.value());
 
       expr = new NumberExpression(value);
 
-      if (match(TokenType.LPAREN)) {
-        // advance LPAREN
-        advance();
+      // if (match(TokenType.LPAREN)) {
+      // // advance LPAREN
+      // advance();
 
-        Expression right = expression();
-        String operator = "*";
+      // Node right = expression();
+      // String operator = "*";
 
-        expr = new BinaryExpression(expr, right, operator);
+      // expr = new BinaryExpression(expr, right, operator);
 
-        if (!match(TokenType.RPAREN))
-          throw new UnsupportedOperationException("Malformed expression: '" + peek() + "' at index: " + pos);
-        // advance RPAREN
-        advance();
+      // if (!match(TokenType.RPAREN))
+      // error("Malformad expression", pos);
+      // // advance RPAREN
+      // advance();
+      // }
 
-      }
+      // return expr;
     }
 
     if (match(TokenType.LPAREN)) {
       advance();
 
       if (isAstEnd())
-        throw new UnsupportedOperationException("Malformed expression: '" + peek().lexeme() + "' at index: " + pos);
+        error("Malformad expression", pos);
 
       expr = expression();
 
       if (!(match(TokenType.RPAREN)))
-        throw new UnsupportedOperationException("Malformed expression: '" + peek().lexeme() + "' at index: " + pos);
+        error("Malformad expression", pos);
 
       // Skipping token LPAREN
       advance();
@@ -119,7 +223,7 @@ public final class RecursiveAstParser implements Parser {
     }
 
     if (expr == null)
-      throw new UnsupportedOperationException("Malformed expression: '" + peek().lexeme() + "' at index: " + pos);
+      error("Malformad expression", pos);
 
     return expr;
   }
@@ -137,23 +241,37 @@ public final class RecursiveAstParser implements Parser {
     return found;
   }
 
+  private void error(String message, int pos) {
+    throw new UnsupportedOperationException(String.format("%s: at index %s", message, pos));
+  }
+
   private Token advance() {
     return (isAstEnd()) ? Token.empty() : tokens.get(pos++);
   }
 
+  private Token peek(int offset) {
+    if (pos + offset >= tokens.size())
+      return Token.empty();
+
+    return tokens.get(pos + offset);
+  }
+
   private Token peek() {
-    return (isAstEnd()) ? Token.empty() : tokens.get(pos);
+    return peek(0);
+  }
+
+  private Token peekNext() {
+    return peek(1);
   }
 
   private boolean isAstEnd() {
     return pos >= tokens.size();
   }
 
-  private void validateExpression() throws UnsupportedOperationException {
-    var lparens = tokens.stream().filter((t) -> t.type() == TokenType.LPAREN).count();
-    var rparens = tokens.stream().filter((t) -> t.type() == TokenType.RPAREN).count();
-
-    if (lparens != rparens)
-      throw new UnsupportedOperationException("Malformed expression Unbalanced paraentheses");
+  private void expect(TokenType... types) throws UnsupportedOperationException {
+    if (!match(types)) {
+      error("Malformad expression", pos);
+    }
   }
+
 }

@@ -3,216 +3,213 @@ package com.github.vmssilva.calculator.engine.parser;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.List;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import com.github.vmssilva.calculator.engine.ast.Expression;
+import com.github.vmssilva.calculator.engine.ast.Node;
+import com.github.vmssilva.calculator.engine.context.ApplicationContext;
 import com.github.vmssilva.calculator.engine.lexer.Lexer;
 import com.github.vmssilva.calculator.engine.lexer.SimpleLexer;
 
 class RecursiveAstParserTest {
 
   private Parser parser;
+  private ApplicationContext ctx;
 
   @BeforeEach
   void setup() {
     Lexer lexer = new SimpleLexer();
     parser = new RecursiveAstParser(lexer);
+    ctx = new ApplicationContext();
   }
 
-  private Double eval(String expr) {
-    Expression ast = parser.parse(expr);
-    return ast.interpret();
+  @SuppressWarnings("unchecked")
+  private BigDecimal eval(String expr) {
+    Node ast = parser.parse(expr);
+    var value = (BigDecimal) ((List<Object>) ast.interpret(ctx)).get(0);
+    return value.setScale(2, RoundingMode.HALF_UP);
+  }
+
+  private BigDecimal expected(Double value) {
+    return new BigDecimal(value).setScale(2, RoundingMode.HALF_UP);
   }
 
   @Test
   @DisplayName("Should add simple numbers")
   void testAddition() {
-    assertEquals(6.0, eval("1+2+3"));
+    assertEquals(expected(6.0), eval("1+2+3"));
   }
 
   @Test
   @DisplayName("Should subtract numbers")
   void testSubtraction() {
-    assertEquals(5.0, eval("10-3-2"));
+    assertEquals(expected(5.0), eval("10-3-2"));
   }
 
   @Test
   @DisplayName("Should multiply numbers")
   void testMultiplication() {
-    assertEquals(24.0, eval("4*3*2"));
+    assertEquals(expected(24.0), eval("4*3*2"));
   }
 
   @Test
   @DisplayName("Should divide numbers")
   void testDivision() {
-    assertEquals(5.0, eval("20/4"));
+    assertEquals(expected(5.0), eval("20/4"));
   }
 
   @Test
   @DisplayName("Should calculate modulo")
   void testModulo() {
-    assertEquals(1.0, eval("10%3"));
+    assertEquals(expected(1.0), eval("10%3"));
   }
 
   @Test
   @DisplayName("Should respect operator precedence")
   void testOperatorPrecedence() {
-    assertEquals(7.0, eval("1+2*3"));
+    assertEquals(expected(7.0), eval("1+2*3"));
   }
 
   @Test
   @DisplayName("Parentheses should change precedence")
   void testParentheses() {
-    assertEquals(9.0, eval("(1+2)*3"));
+    assertEquals(expected(9.0), eval("(1+2)*3"));
   }
 
   @Test
   @DisplayName("Should interpret negative numbers")
   void testSignedNegativeNumber() {
-    assertEquals(-2.0, eval("-5+3"));
+    assertEquals(expected(-2.0), eval("-5+3"));
   }
 
   @Test
   @DisplayName("Should interpret positive signed numbers")
   void testSignedPositiveNumber() {
-    assertEquals(8.0, eval("+5+3"));
+    assertEquals(expected(8.0), eval("+5+3"));
   }
 
   @Test
-  @DisplayName("Complex expression")
-  void testComplexExpression() {
-    assertEquals(14.0, eval("2*(3+4)"));
-  }
-
-  @Test
-  @DisplayName("Expression with multiple operators")
+  @DisplayName("Node with multiple operators")
   void testMultipleOperators() {
-    assertEquals(11.0, eval("3+4*2"));
+    assertEquals(expected(11.0), eval("3+4*2"));
   }
 
   @Test
-  @DisplayName("Expression with nested parentheses")
+  @DisplayName("Node with nested parentheses")
   void testNestedParentheses() {
-    assertEquals(21.0, eval("(1+2)*(3+4)"));
+    assertEquals(expected(21.0), eval("(1+2)*(3+4)"));
   }
 
   @Test
-  @DisplayName("Number followed by parentheses should imply multiplication")
-  void testImplicitMultiplicationSimple() {
-    assertEquals(25.0, eval("5(2+3)"));
-  }
-
-  @Test
-  @DisplayName("Number followed by simple parentheses")
+  @DisplayName("Multiplication by simple parentheses with single number")
   void testImplicitMultiplicationSingleNumber() {
-    assertEquals(20.0, eval("5(4)"));
+    assertEquals(expected(20.0), eval("5*(4)"));
+    assertEquals(expected(20.0), eval("8*(2.5)"));
   }
 
   @Test
-  @DisplayName("Expression before parentheses")
-  void testImplicitMultiplicationExpression() {
-    assertEquals(21.0, eval("3(2+5)"));
-  }
-
-  @Test
-  @DisplayName("Implicit multiplication with inner expression")
+  @DisplayName("Multiplication with inner Node")
   void testImplicitMultiplicationComplex() {
-    assertEquals(30.0, eval("5(2+4)"));
+    assertEquals(expected(30.0), eval("5*(2+4)"));
   }
 
   @Test
-  @DisplayName("Implicit multiplication after another operator")
+  @DisplayName("Multiplication after another operator")
   void testImplicitMultiplicationAfterOperator() {
-    assertEquals(17.0, eval("2+3(5)"));
+    assertEquals(expected(17.0), eval("2+3*(5)"));
   }
 
   @Test
-  @DisplayName("Implicit multiplication with nested parentheses")
+  @DisplayName("Multiplication with nested parentheses")
   void testImplicitMultiplicationNestedParentheses() {
-    assertEquals(50.0, eval("5(2*(3+2))"));
+    assertEquals(expected(50.0), eval("5*(2*(3+2))"));
   }
 
   @Test
-  @DisplayName("Implicit multiplication with negative number")
+  @DisplayName("Multiplication with negative number")
   void testImplicitMultiplicationWithNegative() {
-    assertEquals(-10.0, eval("5(-2)"));
+    assertEquals(expected(-10.0), eval("5*(-2)"));
   }
 
   @Test
-  @DisplayName("Implicit multiplication with decimal number")
+  @DisplayName("Multiplication with decimal number")
   void testImplicitMultiplicationDecimal() {
-    assertEquals(12.5, eval("5(2.5)"));
+    assertEquals(expected(12.5), eval("5*(2.5)"));
   }
 
   @Test
   @DisplayName("Single number")
   void testSingleNumber() {
-    assertEquals(3.0, eval("3"));
+    assertEquals(expected(3.0), eval("3"));
   }
 
   @Test
   @DisplayName("Single decimal-point number")
   void testSingleDecimalPointNumber() {
-    assertEquals(0.5, eval("0.5"));
-    assertEquals(3.1, eval("3.1"));
-    assertEquals(3.50, eval("3.50"));
+    assertEquals(expected(0.5), eval("0.5"));
+    assertEquals(expected(3.1), eval("3.1"));
+    assertEquals(expected(3.50), eval("3.50"));
   }
 
   @Test
   @DisplayName("Simple parentheses around a number")
   void testSingleNumberParentheses() {
-    assertEquals(3.0, eval("(3)"));
-    assertEquals(35.0, eval("(35)"));
+    assertEquals(expected(3.0), eval("(3)"));
+    assertEquals(expected(35.0), eval("(35)"));
   }
 
   @Test
   @DisplayName("Simple parentheses around a decimal-point number")
   void testSingleDecimalPointNumberParentheses() {
-    assertEquals(3.5, eval("(3.5)"));
-    assertEquals(0.2, eval("(0.2)"));
-    assertEquals(0.25, eval("(0.25)"));
+    assertEquals(expected(3.5), eval("(3.5)"));
+    assertEquals(expected(0.2), eval("(0.2)"));
+    assertEquals(expected(0.25), eval("(0.25)"));
   }
 
   @Test
-  @DisplayName("Parentheses around an expression")
-  void testExpressionParentheses() {
-    assertEquals(5.0, eval("(2+3)"));
+  @DisplayName("Parentheses around an Node")
+  void testNodeParentheses() {
+    assertEquals(expected(5.0), eval("(2+3)"));
+    assertEquals(expected(5.0), eval("(10-5)"));
   }
 
   @Test
   @DisplayName("Parentheses around a multiplication")
   void testMultiplicationInsideParentheses() {
-    assertEquals(6.0, eval("(2*3)"));
+    assertEquals(expected(6.0), eval("(2*3)"));
   }
 
   @Test
   @DisplayName("Nested parentheses with a single number")
   void testNesteParenthesesSingleNumber() {
-    assertEquals(3.0, eval("((3))"));
+    assertEquals(expected(3.0), eval("((3))"));
   }
 
   @Test
-  @DisplayName("Nested parentheses with expression")
-  void testNestedExpressionParentheses() {
-    assertEquals(9.0, eval("((1+2)*3)"));
+  @DisplayName("Nested parentheses with Node")
+  void testNestedNodeParentheses() {
+    assertEquals(expected(9.0), eval("((1+2)*3)"));
   }
 
   @Test
   @DisplayName("Parentheses with negative number")
   void testNegativeInsideParentheses() {
-    assertEquals(-5.0, eval("(-5)"));
+    assertEquals(expected(-5.0), eval("(-5)"));
   }
 
   @Test
   @DisplayName("Parentheses with decimal number")
   void testDecimalInsideParentheses() {
-    assertEquals(2.5, eval("(2.5)"));
+    assertEquals(expected(2.5), eval("(2.5)"));
   }
 
   @Test
-  @DisplayName("Operator at the end of the expression")
+  @DisplayName("Operator at the end of the Node")
   void testTrailingOperator() {
     assertThrows(UnsupportedOperationException.class, () -> eval("1+"));
   }
@@ -248,8 +245,8 @@ class RecursiveAstParserTest {
   }
 
   @Test
-  @DisplayName("Empty expression")
-  void testEmptyExpression() {
+  @DisplayName("Empty Node")
+  void testEmptyNode() {
     assertThrows(UnsupportedOperationException.class, () -> eval(""));
   }
 
@@ -260,8 +257,8 @@ class RecursiveAstParserTest {
   }
 
   @Test
-  @DisplayName("Incomplete parentheses expression")
-  void testIncompleteParenthesesExpression() {
+  @DisplayName("Incomplete parentheses Node")
+  void testIncompleteParenthesesNode() {
     assertThrows(UnsupportedOperationException.class, () -> eval("(2+)"));
   }
 

@@ -1,7 +1,7 @@
 package com.github.vmssilva.calculator.engine.parser;
 
-import com.github.vmssilva.calculator.engine.ast.Expression;
+import com.github.vmssilva.calculator.engine.ast.Node;
 
 public interface Parser {
-  Expression parse(String expression);
+  Node parse(String expression);
 }

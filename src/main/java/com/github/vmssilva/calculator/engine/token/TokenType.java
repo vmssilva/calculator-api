@@ -6,6 +6,11 @@ public enum TokenType {
   MINUS,
   SLASH,
   STAR,
+  CARET,
+  IDENTIFIER,
+  EQUAL,
+  SEMICOLON,
+  COMMA,
   PERCENT,
   LPAREN,
   RPAREN
