@@ -4,8 +4,6 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.security.auth.callback.TextOutputCallback;
-
 import com.github.vmssilva.calculator.engine.ast.FunctionCallNode;
 import com.github.vmssilva.calculator.engine.ast.IdentifierNode;
 import com.github.vmssilva.calculator.engine.ast.Node;
@@ -93,6 +91,12 @@ public final class RecursiveAstParser implements Parser {
 
     expect(TokenType.LPAREN);
     advance(); // LPAREN
+
+    if (match(TokenType.RPAREN)) {
+      advance();
+      return new FunctionCallNode(identifier.value(), List.of());
+    }
+
     args.add(expression());
 
     while (match(TokenType.COMMA)) {
