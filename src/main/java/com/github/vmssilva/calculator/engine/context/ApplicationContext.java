@@ -3,6 +3,7 @@ package com.github.vmssilva.calculator.engine.context;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 
@@ -90,67 +91,102 @@ public class ApplicationContext {
 
   }
 
+  private void assertUnaryFunction(List<Object> args) {
+    asserNumArgs(args, 1);
+  }
+
+  private void assertBinaryFunction(List<Object> args) {
+    asserNumArgs(args, 2);
+  }
+
+  private void asserNumArgs(List<Object> args, int count) {
+    if (args.isEmpty())
+      throw new IllegalArgumentException("Missing operands");
+
+    if (args.size() < count)
+      throw new IllegalArgumentException("Missing right operand");
+
+    if (args.size() > count)
+      throw new IllegalArgumentException("Too much arguments");
+
+  }
+
   private void loadBuiltin(Scope builtins) {
     builtins.set("PI", new BigDecimal(Math.PI));
     builtins.set("E", new BigDecimal(Math.E));
 
     builtins.set("add", (Function) args -> {
+      assertBinaryFunction(args);
       return ((BigDecimal) args.get(0)).add((BigDecimal) args.get(1));
     });
 
     builtins.set("subtract", (Function) args -> {
+      assertBinaryFunction(args);
       return ((BigDecimal) args.get(0)).subtract((BigDecimal) args.get(1));
     });
 
     builtins.set("multiply", (Function) args -> {
+      assertBinaryFunction(args);
       return ((BigDecimal) args.get(0)).multiply((BigDecimal) args.get(1));
     });
 
     builtins.set("divide", (Function) args -> {
+      assertBinaryFunction(args);
       return ((BigDecimal) args.get(0)).divide((BigDecimal) args.get(1), 10, RoundingMode.HALF_UP);
     });
 
     builtins.set("remainder", (Function) args -> {
+      assertBinaryFunction(args);
       return ((BigDecimal) args.get(0)).remainder((BigDecimal) args.get(1));
     });
 
     builtins.set("abs", (Function) args -> {
+      assertUnaryFunction(args);
       return ((BigDecimal) args.get(0)).abs();
     });
 
     builtins.set("negate", (Function) args -> {
+      assertUnaryFunction(args);
       return ((BigDecimal) args.get(0)).negate();
     });
 
     builtins.set("pow", (Function) args -> {
+      assertBinaryFunction(args);
       return ((BigDecimal) args.get(0)).pow(((BigDecimal) args.get(1)).intValue());
     });
 
     builtins.set("sqrt", (Function) args -> {
+      assertUnaryFunction(args);
       return new BigDecimal(Math.sqrt(((BigDecimal) args.get(0)).doubleValue()));
     });
 
     builtins.set("sin", (Function) args -> {
+      assertUnaryFunction(args);
       return new BigDecimal(Math.sin(((BigDecimal) args.get(0)).doubleValue()));
     });
 
     builtins.set("tan", (Function) args -> {
+      assertUnaryFunction(args);
       return new BigDecimal(Math.tan(((BigDecimal) args.get(0)).doubleValue()));
     });
 
     builtins.set("cos", (Function) args -> {
+      assertUnaryFunction(args);
       return new BigDecimal(Math.cos(((BigDecimal) args.get(0)).doubleValue()));
     });
 
     builtins.set("log", (Function) args -> {
+      assertUnaryFunction(args);
       return new BigDecimal(Math.log(((BigDecimal) args.get(0)).doubleValue()));
     });
 
     builtins.set("floor", (Function) args -> {
+      assertUnaryFunction(args);
       return new BigDecimal(Math.floor(((BigDecimal) args.get(0)).doubleValue()));
     });
 
     builtins.set("ceil", (Function) args -> {
+      assertUnaryFunction(args);
       return new BigDecimal(Math.ceil(((BigDecimal) args.get(0)).doubleValue()));
     });
 
