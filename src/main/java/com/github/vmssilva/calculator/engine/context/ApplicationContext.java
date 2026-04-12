@@ -19,6 +19,7 @@ public class ApplicationContext {
 
   public ApplicationContext() {
     var builtins = new Scope(null);
+
     loadBuiltin(builtins);
     var global = new Scope(builtins);
     this.scopes.push(new Scope(global));

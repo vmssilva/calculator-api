@@ -1,6 +1,7 @@
 package com.github.vmssilva.calculator.engine.runtime;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Objects;
 
 import com.github.vmssilva.calculator.engine.ast.Node;
@@ -26,7 +27,13 @@ public class CalculatorRuntime {
   }
 
   public BigDecimal evaluate(String expression, ApplicationContext context) {
-    return Values.asNumber(new RecursiveAstParser().parse(expression).interpret(context));
+    BigDecimal result = Values.asNumber(new RecursiveAstParser().parse(expression).interpret(context));
+    int scale = result.scale();
+
+    if (context.has("scale"))
+      scale = Values.asNumber(context.get("scale")).intValue();
+
+    return result.setScale(scale, RoundingMode.HALF_UP);
   }
 
   public BigDecimal evaluate(String expression) {

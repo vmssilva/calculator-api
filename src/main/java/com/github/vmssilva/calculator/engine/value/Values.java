@@ -1,7 +1,6 @@
 package com.github.vmssilva.calculator.engine.value;
 
 import java.math.BigDecimal;
-import java.util.function.Function;
 
 public final class Values {
 
