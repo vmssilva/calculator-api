@@ -4,13 +4,14 @@ import java.util.List;
 import java.util.Objects;
 
 import com.github.vmssilva.calculator.engine.context.ApplicationContext;
+import com.github.vmssilva.calculator.engine.value.Value;
 
 public record ProgramNode(List<Node> nodes) implements Node {
   @Override
-  public Object interpret(ApplicationContext context) {
-    var result = nodes.stream().filter(Objects::nonNull)
-        .map(node -> node.interpret(context)).toList();
+  public Value interpret(ApplicationContext context) {
 
-    return result;
+    return nodes.stream().filter(Objects::nonNull)
+        .map(node -> node.interpret(context))
+        .reduce((first, second) -> second).orElse(null);
   }
 }

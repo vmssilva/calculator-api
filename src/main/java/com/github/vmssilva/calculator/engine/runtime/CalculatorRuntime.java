@@ -2,45 +2,42 @@ package com.github.vmssilva.calculator.engine.runtime;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.List;
+import java.util.Objects;
 
 import com.github.vmssilva.calculator.engine.ast.Node;
 import com.github.vmssilva.calculator.engine.context.ApplicationContext;
+import com.github.vmssilva.calculator.engine.parser.RecursiveAstParser;
+import com.github.vmssilva.calculator.engine.value.Values;
 
-@SuppressWarnings("unchecked")
 public class CalculatorRuntime {
 
-  private ApplicationContext context;
+  private final ApplicationContext context;
 
   public CalculatorRuntime(ApplicationContext context) {
-    this.context = context;
+    this.context = Objects.requireNonNull(context);
   }
 
-  public void run(Node calc) {
-
-    var node = calc.interpret(context);
-
-    if (node instanceof List) {
-      ((List<Object>) node).forEach(this::print);
-    } else {
-      print(node);
-    }
+  public CalculatorRuntime() {
+    this(new ApplicationContext());
   }
 
-  private void print(Object o) {
-
-    if (o == null)
-      return;
-
-    if (o instanceof List) {
-      ((List<Object>) o).forEach((e) -> {
-        print(e);
-      });
-    }
-
-    var result = (BigDecimal) o;
-    var scale = (context.has("scale")) ? ((BigDecimal) context.get("scale")).intValue() : result.scale();
-    System.out.println(result.setScale(scale, RoundingMode.HALF_UP));
-
+  public void run(Node ast) {
+    var node = ast.interpret(context);
+    System.out.println(Values.asNumber(node));
   }
+
+  public BigDecimal evaluate(String expression, ApplicationContext context) {
+    BigDecimal result = Values.asNumber(new RecursiveAstParser().parse(expression).interpret(context));
+    int scale = result.scale();
+
+    if (context.has("scale"))
+      scale = Values.asNumber(context.get("scale")).intValue();
+
+    return result.setScale(scale, RoundingMode.HALF_UP);
+  }
+
+  public BigDecimal evaluate(String expression) {
+    return evaluate(expression, this.context);
+  }
+
 }

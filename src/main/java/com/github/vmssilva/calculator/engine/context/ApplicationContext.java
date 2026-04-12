@@ -7,7 +7,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 
-import com.github.vmssilva.calculator.engine.ast.Function;
+import com.github.vmssilva.calculator.engine.value.FunctionValue;
+import com.github.vmssilva.calculator.engine.value.NumberValue;
+import com.github.vmssilva.calculator.engine.value.Value;
+import com.github.vmssilva.calculator.engine.value.Values;
 
 public class ApplicationContext {
 
@@ -16,6 +19,7 @@ public class ApplicationContext {
 
   public ApplicationContext() {
     var builtins = new Scope(null);
+
     loadBuiltin(builtins);
     var global = new Scope(builtins);
     this.scopes.push(new Scope(global));
@@ -30,11 +34,11 @@ public class ApplicationContext {
       this.scopes.pop();
   }
 
-  public void set(String name, Object value) {
+  public void set(String name, Value value) {
     scopes.peek().set(name, value);
   }
 
-  public Object get(String name) {
+  public Value get(String name) {
     if (alias.containsKey(name))
       return scopes.peek().get(alias.get(name));
 
@@ -61,14 +65,14 @@ public class ApplicationContext {
 
   private class Scope {
     private Scope parent;
-    private Map<String, Object> map;
+    private Map<String, Value> map;
 
     private Scope(Scope parent) {
       this.parent = parent;
       this.map = new HashMap<>();
     }
 
-    public Object get(String name) {
+    public Value get(String name) {
       if (has(name))
         return map.get(name);
 
@@ -78,7 +82,7 @@ public class ApplicationContext {
       throw new RuntimeException(name + " is not defined");
     }
 
-    public void set(String name, Object value) {
+    public void set(String name, Value value) {
       map.put(name, value);
     }
 
@@ -88,18 +92,17 @@ public class ApplicationContext {
 
       return false;
     }
-
   }
 
-  private void assertUnaryFunction(List<Object> args) {
+  private void assertUnaryFunction(List<Value> args) {
     asserNumArgs(args, 1);
   }
 
-  private void assertBinaryFunction(List<Object> args) {
+  private void assertBinaryFunction(List<Value> args) {
     asserNumArgs(args, 2);
   }
 
-  private void asserNumArgs(List<Object> args, int count) {
+  private void asserNumArgs(List<Value> args, int count) {
     if (args.isEmpty())
       throw new IllegalArgumentException("Missing operands");
 
@@ -112,86 +115,108 @@ public class ApplicationContext {
   }
 
   private void loadBuiltin(Scope builtins) {
-    builtins.set("PI", new BigDecimal(Math.PI));
-    builtins.set("E", new BigDecimal(Math.E));
+    builtins.set("PI", new NumberValue(new BigDecimal(Math.PI)));
+    builtins.set("E", new NumberValue(new BigDecimal(Math.E)));
 
-    builtins.set("add", (Function) args -> {
+    builtins.set("add", (FunctionValue) args -> {
       assertBinaryFunction(args);
-      return ((BigDecimal) args.get(0)).add((BigDecimal) args.get(1));
+      var left = Values.asNumber(args.get(0));
+      var right = Values.asNumber(args.get(1));
+      return new NumberValue(left.add(right));
     });
 
-    builtins.set("subtract", (Function) args -> {
+    builtins.set("subtract", (FunctionValue) args -> {
       assertBinaryFunction(args);
-      return ((BigDecimal) args.get(0)).subtract((BigDecimal) args.get(1));
+      var left = Values.asNumber(args.get(0));
+      var right = Values.asNumber(args.get(1));
+      return new NumberValue(left.subtract(right));
     });
 
-    builtins.set("multiply", (Function) args -> {
+    builtins.set("multiply", (FunctionValue) args -> {
       assertBinaryFunction(args);
-      return ((BigDecimal) args.get(0)).multiply((BigDecimal) args.get(1));
+      var left = Values.asNumber(args.get(0));
+      var right = Values.asNumber(args.get(1));
+      return new NumberValue(left.multiply(right));
     });
 
-    builtins.set("divide", (Function) args -> {
+    builtins.set("divide", (FunctionValue) args -> {
       assertBinaryFunction(args);
-      return ((BigDecimal) args.get(0)).divide((BigDecimal) args.get(1), 10, RoundingMode.HALF_UP);
+      var left = Values.asNumber(args.get(0));
+      var right = Values.asNumber(args.get(1));
+      return new NumberValue(left.divide(right, 10, RoundingMode.HALF_UP));
     });
 
-    builtins.set("remainder", (Function) args -> {
+    builtins.set("remainder", (FunctionValue) args -> {
       assertBinaryFunction(args);
-      return ((BigDecimal) args.get(0)).remainder((BigDecimal) args.get(1));
+      var left = Values.asNumber(args.get(0));
+      var right = Values.asNumber(args.get(1));
+      return new NumberValue(left.remainder(right));
     });
 
-    builtins.set("abs", (Function) args -> {
+    builtins.set("abs", (FunctionValue) args -> {
       assertUnaryFunction(args);
-      return ((BigDecimal) args.get(0)).abs();
+      var value = Values.asNumber(args.get(0));
+      return new NumberValue(value.abs());
     });
 
-    builtins.set("negate", (Function) args -> {
+    builtins.set("negate", (FunctionValue) args -> {
       assertUnaryFunction(args);
-      return ((BigDecimal) args.get(0)).negate();
+      var value = Values.asNumber(args.get(0));
+      return new NumberValue(value.negate());
     });
 
-    builtins.set("pow", (Function) args -> {
+    builtins.set("pow", (FunctionValue) args -> {
       assertBinaryFunction(args);
-      return ((BigDecimal) args.get(0)).pow(((BigDecimal) args.get(1)).intValue());
+      var left = Values.asNumber(args.get(0));
+      var right = Values.asNumber(args.get(1));
+      return new NumberValue(left.pow(right.intValue()));
     });
 
-    builtins.set("sqrt", (Function) args -> {
+    builtins.set("sqrt", (FunctionValue) args -> {
       assertUnaryFunction(args);
-      return new BigDecimal(Math.sqrt(((BigDecimal) args.get(0)).doubleValue()));
+      var value = Values.asNumber(args.get(0));
+      return new NumberValue(new BigDecimal(Math.sqrt(value.doubleValue())));
     });
 
-    builtins.set("sin", (Function) args -> {
+    builtins.set("sin", (FunctionValue) args -> {
       assertUnaryFunction(args);
-      return new BigDecimal(Math.sin(((BigDecimal) args.get(0)).doubleValue()));
+      var value = Values.asNumber(args.get(0));
+      return new NumberValue(new BigDecimal(Math.sin(value.doubleValue())));
     });
 
-    builtins.set("tan", (Function) args -> {
+    builtins.set("tan", (FunctionValue) args -> {
       assertUnaryFunction(args);
-      return new BigDecimal(Math.tan(((BigDecimal) args.get(0)).doubleValue()));
+      var value = Values.asNumber(args.get(0));
+      return new NumberValue(new BigDecimal(Math.tan(value.doubleValue())));
     });
 
-    builtins.set("cos", (Function) args -> {
+    builtins.set("cos", (FunctionValue) args -> {
       assertUnaryFunction(args);
-      return new BigDecimal(Math.cos(((BigDecimal) args.get(0)).doubleValue()));
+      var value = Values.asNumber(args.get(0));
+      return new NumberValue(new BigDecimal(Math.cos(value.doubleValue())));
     });
 
-    builtins.set("log", (Function) args -> {
+    builtins.set("log", (FunctionValue) args -> {
       assertUnaryFunction(args);
-      return new BigDecimal(Math.log(((BigDecimal) args.get(0)).doubleValue()));
+      var value = Values.asNumber(args.get(0));
+      return new NumberValue(new BigDecimal(Math.log(value.doubleValue())));
     });
 
-    builtins.set("floor", (Function) args -> {
+    builtins.set("floor", (FunctionValue) args -> {
       assertUnaryFunction(args);
-      return new BigDecimal(Math.floor(((BigDecimal) args.get(0)).doubleValue()));
+      var value = Values.asNumber(args.get(0));
+      return new NumberValue(new BigDecimal(Math.floor(value.doubleValue())));
     });
 
-    builtins.set("ceil", (Function) args -> {
+    builtins.set("ceil", (FunctionValue) args -> {
       assertUnaryFunction(args);
-      return new BigDecimal(Math.ceil(((BigDecimal) args.get(0)).doubleValue()));
+      var value = Values.asNumber(args.get(0));
+      return new NumberValue(new BigDecimal(Math.ceil(value.doubleValue())));
     });
 
     alias.put("mod", "remainder");
-
+    alias.put("div", "divide");
+    alias.put("sub", "subtract");
   }
 
 }
