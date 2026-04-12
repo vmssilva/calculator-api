@@ -45,13 +45,13 @@ public final class RecursiveAstParser implements Parser {
       error("Malformed expression", pos);
 
     while (!isAstEnd()) {
-      nodes.add(primary());
+      nodes.add(statement());
     }
 
     return new ProgramNode(nodes);
   }
 
-  private Node primary() {
+  private Node statement() {
     if (isAssignment()) {
       var declaration = parseDeclaration();
 
@@ -65,14 +65,6 @@ public final class RecursiveAstParser implements Parser {
     return parseExpression();
   }
 
-  private Node parseDeclaration() {
-    var identifier = advance();
-    advance();
-    var expression = expression();
-
-    return new VarNode(identifier.value(), expression);
-  }
-
   private Node parseExpression() {
     var expression = expression();
 
@@ -82,44 +74,6 @@ public final class RecursiveAstParser implements Parser {
     }
 
     return expression;
-  }
-
-  private Node parseCallFunction() {
-    List<Node> args = new ArrayList<>();
-
-    var identifier = advance();
-
-    expect(TokenType.LPAREN);
-    advance(); // LPAREN
-
-    if (match(TokenType.RPAREN)) {
-      advance();
-      return new FunctionCallNode(identifier.value(), List.of());
-    }
-
-    args.add(expression());
-
-    while (match(TokenType.COMMA)) {
-      advance();
-      args.add(expression());
-    }
-
-    expect(TokenType.RPAREN);
-    advance();
-
-    return new FunctionCallNode(identifier.value(), args);
-  }
-
-  private Node parseIdentifier() {
-    return new IdentifierNode(advance().value());
-  }
-
-  private boolean isAssignment() {
-    return peek().type() == TokenType.IDENTIFIER && peekNext().type() == TokenType.EQUAL;
-  }
-
-  private boolean isFunction() {
-    return peek().type() == TokenType.IDENTIFIER && peekNext().type() == TokenType.LPAREN;
   }
 
   private Node expression() {
@@ -141,13 +95,9 @@ public final class RecursiveAstParser implements Parser {
     return expr;
   }
 
-  private TokenType[] operators() {
-    return new TokenType[] { TokenType.PLUS, TokenType.MINUS, TokenType.STAR, TokenType.SLASH, TokenType.PERCENT,
-        TokenType.CARET };
-  }
-
   private Node term() {
-    Node expr = factor();
+
+    Node expr = power();
 
     while (match(TokenType.STAR, TokenType.SLASH, TokenType.PERCENT, TokenType.CARET)) {
       var operator = advance().value();
@@ -155,12 +105,25 @@ public final class RecursiveAstParser implements Parser {
       if (match(operators()))
         error("Malformed expression", pos);
 
-      Node right = expression();
+      Node right = factor();
 
       expr = new BinaryExpression(expr, right, operator);
     }
 
     return expr;
+  }
+
+  private Node power() {
+
+    Node left = factor();
+
+    while (match(TokenType.CARET)) {
+      var operator = advance();
+      Node right = power();
+      return new BinaryExpression(left, right, operator.value());
+    }
+
+    return left;
   }
 
   private Node factor() {
@@ -189,7 +152,6 @@ public final class RecursiveAstParser implements Parser {
     if (match(TokenType.NUMBER)) {
       Token token = advance();
       var value = new BigDecimal(token.value());
-
       expr = new NumberExpression(value);
 
       // if (match(TokenType.LPAREN)) {
@@ -230,6 +192,58 @@ public final class RecursiveAstParser implements Parser {
       error("Malformad expression", pos);
 
     return expr;
+  }
+
+  // Helpers
+  private Node parseIdentifier() {
+    return new IdentifierNode(advance().value());
+  }
+
+  private Node parseDeclaration() {
+    var identifier = advance();
+    advance();
+    var expression = expression();
+
+    return new VarNode(identifier.value(), expression);
+  }
+
+  private Node parseCallFunction() {
+    List<Node> args = new ArrayList<>();
+
+    var identifier = advance();
+
+    expect(TokenType.LPAREN);
+    advance(); // LPAREN
+
+    if (match(TokenType.RPAREN)) {
+      advance();
+      return new FunctionCallNode(identifier.value(), List.of());
+    }
+
+    args.add(expression());
+
+    while (match(TokenType.COMMA)) {
+      advance();
+      args.add(expression());
+    }
+
+    expect(TokenType.RPAREN);
+    advance();
+
+    return new FunctionCallNode(identifier.value(), args);
+  }
+
+  private boolean isAssignment() {
+    return peek().type() == TokenType.IDENTIFIER && peekNext().type() == TokenType.EQUAL;
+  }
+
+  private boolean isFunction() {
+    return peek().type() == TokenType.IDENTIFIER && peekNext().type() == TokenType.LPAREN;
+  }
+
+  private TokenType[] operators() {
+    return new TokenType[] { TokenType.PLUS, TokenType.MINUS, TokenType.STAR, TokenType.SLASH, TokenType.PERCENT,
+        TokenType.CARET };
   }
 
   private boolean match(TokenType... types) {
