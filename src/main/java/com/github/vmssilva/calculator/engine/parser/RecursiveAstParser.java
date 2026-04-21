@@ -154,22 +154,9 @@ public final class RecursiveAstParser implements Parser {
       var value = new BigDecimal(token.value());
       expr = new NumberExpression(value);
 
-      // if (match(TokenType.LPAREN)) {
-      // // advance LPAREN
-      // advance();
+      if (match(TokenType.LPAREN))
+        error("Malformed expression", pos);
 
-      // Node right = expression();
-      // String operator = "*";
-
-      // expr = new BinaryExpression(expr, right, operator);
-
-      // if (!match(TokenType.RPAREN))
-      // error("Malformad expression", pos);
-      // // advance RPAREN
-      // advance();
-      // }
-
-      // return expr;
     }
 
     if (match(TokenType.LPAREN)) {
