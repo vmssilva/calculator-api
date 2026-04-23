@@ -24,7 +24,12 @@ public record FunctionCallNode(String name, List<Node> args) implements Node {
       List<BigDecimal> arguments = evaluated.stream().map(Values::asNumber).toList();
 
       throw new CalculatorRuntimeException(
-          "Error on call function " + name + " with args " + arguments + " " + e.getMessage().toLowerCase());
+          "Execution error: Failed to evaluate function '" + name + "' with args " + arguments + "' Reason: "
+              + e.getMessage().toLowerCase());
+
+      // throw new CalculatorRuntimeException(
+      // "Invalid call to function '" + name + "' with args " + arguments + "'" +
+      // e.getMessage().toLowerCase());
     }
   }
 }

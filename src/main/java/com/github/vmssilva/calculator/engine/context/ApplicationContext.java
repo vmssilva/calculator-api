@@ -106,7 +106,7 @@ public class ApplicationContext {
       if (parent != null)
         return parent.getVar(name);
 
-      throw new CalculatorRuntimeException(name + " is not defined");
+      throw new CalculatorRuntimeException("Execution error: '" + name + "' is not defined");
     }
 
     public void setFunction(String name, Value value) {
@@ -120,7 +120,7 @@ public class ApplicationContext {
       if (parent != null)
         return parent.getFunction(name);
 
-      throw new CalculatorRuntimeException("Function " + name + " is not defined");
+      throw new CalculatorRuntimeException("Execution error: unknown function '" + name + "'");
     }
 
     public boolean hasVar(String name) {
