@@ -3,6 +3,7 @@ package com.github.vmssilva.calculator.engine.parser;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.github.vmssilva.calculator.engine.ast.FunctionCallNode;
 import com.github.vmssilva.calculator.engine.ast.IdentifierNode;
@@ -12,6 +13,7 @@ import com.github.vmssilva.calculator.engine.ast.VarNode;
 import com.github.vmssilva.calculator.engine.ast.expressions.BinaryExpression;
 import com.github.vmssilva.calculator.engine.ast.expressions.NumberExpression;
 import com.github.vmssilva.calculator.engine.ast.expressions.UnaryExpression;
+import com.github.vmssilva.calculator.engine.exception.CalculatorParserException;
 import com.github.vmssilva.calculator.engine.lexer.Lexer;
 import com.github.vmssilva.calculator.engine.lexer.SimpleLexer;
 import com.github.vmssilva.calculator.engine.token.Token;
@@ -42,7 +44,7 @@ public final class RecursiveAstParser implements Parser {
     List<Node> nodes = new ArrayList<>();
 
     if (tokens.isEmpty())
-      error("Malformed expression", pos);
+      syntaxError(0, pos);
 
     while (!isAstEnd()) {
       nodes.add(statement());
@@ -52,6 +54,7 @@ public final class RecursiveAstParser implements Parser {
   }
 
   private Node statement() {
+
     if (isAssignment()) {
       var declaration = parseDeclaration();
 
@@ -84,8 +87,8 @@ public final class RecursiveAstParser implements Parser {
 
       String operator = advance().value();
 
-      if (match(operators()))
-        error("Malformed expression", pos);
+      if (isOperator())
+        syntaxError(0, pos);
 
       Node right = term();
       expr = new BinaryExpression(expr, right, operator);
@@ -102,8 +105,8 @@ public final class RecursiveAstParser implements Parser {
     while (match(TokenType.STAR, TokenType.SLASH, TokenType.PERCENT, TokenType.CARET)) {
       var operator = advance().value();
 
-      if (match(operators()))
-        error("Malformed expression", pos);
+      if (isOperator())
+        syntaxError(0, pos);
 
       Node right = factor();
 
@@ -119,6 +122,10 @@ public final class RecursiveAstParser implements Parser {
 
     while (match(TokenType.CARET)) {
       var operator = advance();
+
+      if (isOperator())
+        syntaxError(0, pos);
+
       Node right = power();
       return new BinaryExpression(left, right, operator.value());
     }
@@ -131,9 +138,13 @@ public final class RecursiveAstParser implements Parser {
 
     // Signed expressions
     if (match(TokenType.PLUS, TokenType.MINUS)) {
-      String operator = advance().value();
+      Token operator = advance();
+
+      if (isOperator())
+        syntaxError(0, pos);
+
       Node right = factor();
-      expr = new UnaryExpression(operator, right);
+      expr = new UnaryExpression(operator.value(), right);
 
       return expr;
     }
@@ -155,7 +166,7 @@ public final class RecursiveAstParser implements Parser {
       expr = new NumberExpression(value);
 
       if (match(TokenType.LPAREN))
-        error("Malformed expression", pos);
+        syntaxError(0, pos);
 
     }
 
@@ -163,12 +174,12 @@ public final class RecursiveAstParser implements Parser {
       advance();
 
       if (isAstEnd())
-        error("Malformad expression", pos);
+        syntaxError(0, pos);
 
       expr = expression();
 
       if (!(match(TokenType.RPAREN)))
-        error("Malformad expression", pos);
+        syntaxError(0, pos);
 
       // Skipping token LPAREN
       advance();
@@ -176,12 +187,11 @@ public final class RecursiveAstParser implements Parser {
     }
 
     if (expr == null)
-      error("Malformad expression", pos);
+      syntaxError(0, pos);
 
     return expr;
   }
 
-  // Helpers
   private Node parseIdentifier() {
     return new IdentifierNode(advance().value());
   }
@@ -228,6 +238,10 @@ public final class RecursiveAstParser implements Parser {
     return peek().type() == TokenType.IDENTIFIER && peekNext().type() == TokenType.LPAREN;
   }
 
+  private boolean isOperator() {
+    return match(operators());
+  }
+
   private TokenType[] operators() {
     return new TokenType[] { TokenType.PLUS, TokenType.MINUS, TokenType.STAR, TokenType.SLASH, TokenType.PERCENT,
         TokenType.CARET };
@@ -244,10 +258,6 @@ public final class RecursiveAstParser implements Parser {
     }
 
     return found;
-  }
-
-  private void error(String message, int pos) {
-    throw new UnsupportedOperationException(String.format("%s: at index %s", message, pos));
   }
 
   private Token advance() {
@@ -273,9 +283,34 @@ public final class RecursiveAstParser implements Parser {
     return pos >= tokens.size();
   }
 
-  private void expect(TokenType... types) throws UnsupportedOperationException {
+  private void error(String message, int line, int col) {
+    throw new CalculatorParserException(message, line, col);
+  }
+
+  private void syntaxError(int line, int col) {
+
+    StringBuilder message = new StringBuilder();
+    message.append("SyntaxError near index [").append(line).append(", ").append(col).append("]");
+
+    if (!tokens.isEmpty()) {
+      StringBuilder sb = new StringBuilder(
+          tokens.stream().map(token -> token.value())
+              .collect(Collectors.joining("")));
+
+      sb.insert(pos, "^");
+      message.append(" ").append(sb);
+
+    } else {
+      message.append(" expression can't be null");
+    }
+
+    error(message.toString(), line, col);
+
+  }
+
+  private void expect(TokenType... types) throws CalculatorParserException {
     if (!match(types)) {
-      error("Malformad expression", pos);
+      syntaxError(0, pos);
     }
   }
 

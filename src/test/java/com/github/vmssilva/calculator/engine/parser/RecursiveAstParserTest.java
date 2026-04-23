@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 
 import com.github.vmssilva.calculator.engine.ast.Node;
 import com.github.vmssilva.calculator.engine.context.ApplicationContext;
+import com.github.vmssilva.calculator.engine.exception.CalculatorParserException;
 import com.github.vmssilva.calculator.engine.lexer.Lexer;
 import com.github.vmssilva.calculator.engine.lexer.SimpleLexer;
 import com.github.vmssilva.calculator.engine.value.Values;
@@ -327,54 +328,55 @@ class RecursiveAstParserTest {
   @Test
   @DisplayName("Operator at the end of the Node")
   void testTrailingOperator() {
-    assertThrows(UnsupportedOperationException.class, () -> eval("1+"));
+    assertThrows(CalculatorParserException.class, () -> eval("1+"));
   }
 
   @Test
   @DisplayName("Invalid operator at the beginning")
   void testLeadingOperator() {
-    assertThrows(UnsupportedOperationException.class, () -> eval("*2+3"));
+    assertThrows(CalculatorParserException.class, () -> eval("*2+3"));
   }
 
   @Test
   @DisplayName("Unclosed parenthesis")
   void testUnclosedParenthesis() {
-    assertThrows(UnsupportedOperationException.class, () -> eval("(1+2"));
+    assertThrows(CalculatorParserException.class, () -> eval("(1+2"));
   }
 
   @Test
   @DisplayName("Unexpected closing parenthesis")
   void testUnexpectedClosingParenthesis() {
-    assertThrows(UnsupportedOperationException.class, () -> eval("1+2)"));
+    assertThrows(CalculatorParserException.class, () -> eval("1+2)"));
   }
 
   @Test
   @DisplayName("Empty parentheses")
   void testEmptyParentheses() {
-    assertThrows(UnsupportedOperationException.class, () -> eval("()"));
+    assertThrows(CalculatorParserException.class, () -> eval("()"));
   }
 
   @Test
   @DisplayName("Two consecutive operators")
   void testDoubleOperator() {
-    assertThrows(UnsupportedOperationException.class, () -> eval("2++3"));
+    assertThrows(CalculatorParserException.class, () -> eval("2++3"));
   }
 
   @Test
   @DisplayName("Empty Node")
   void testEmptyNode() {
-    assertThrows(UnsupportedOperationException.class, () -> eval(""));
+    assertThrows(CalculatorParserException.class, () -> eval(""));
   }
 
   @Test
   @DisplayName("Invalid operator sequence")
   void testInvalidOperatorSequence() {
-    assertThrows(UnsupportedOperationException.class, () -> eval("5*/2"));
+    assertThrows(CalculatorParserException.class, () -> eval("5*/2"));
   }
 
   @Test
   @DisplayName("Incomplete parentheses Node")
   void testIncompleteParenthesesNode() {
-    assertThrows(UnsupportedOperationException.class, () -> eval("(2+)"));
+    assertThrows(CalculatorParserException.class, () -> eval("(2+)"));
   }
+
 }

@@ -3,6 +3,7 @@ package com.github.vmssilva.calculator.engine.lexer;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.github.vmssilva.calculator.engine.exception.CalculatorLexerException;
 import com.github.vmssilva.calculator.engine.token.Token;
 import com.github.vmssilva.calculator.engine.token.TokenType;
 
@@ -11,6 +12,7 @@ public final class SimpleLexer implements Lexer {
   private List<Token> tokens;
   private String expression;
   private int current = 0;
+  private int line;
 
   @Override
   public List<Token> tokenize(String source) {
@@ -27,6 +29,11 @@ public final class SimpleLexer implements Lexer {
   }
 
   private void scan(char c) {
+
+    if (c == '\n') {
+      line++;
+      advance();
+    }
 
     if (String.valueOf(c).isBlank()) {
       advance();
@@ -109,7 +116,7 @@ public final class SimpleLexer implements Lexer {
       return;
     }
 
-    throw new NumberFormatException("Invalid character '" + c + "' at index: " + current);
+    invalidCharacterFound(c, line, current);
 
   }
 
@@ -123,8 +130,11 @@ public final class SimpleLexer implements Lexer {
 
     if (peek() == '.') {
 
+      if (isAtEnd())
+        invalidCharacterFound(peek(), line, current);
+
       if (!isDigit(peekNext()))
-        throw new NumberFormatException("Invalid number format");
+        invalidCharacterFound(peek(), line, current);
 
       value.append(peek());
       advance();
@@ -135,7 +145,7 @@ public final class SimpleLexer implements Lexer {
       }
 
       if (!isAtEnd() && peek() == '.')
-        throw new NumberFormatException("Invalid number format");
+        invalidCharacterFound(peek(), line, current);
 
     }
 
@@ -178,5 +188,13 @@ public final class SimpleLexer implements Lexer {
 
   private boolean isAtEnd() {
     return current >= expression.length();
+  }
+
+  private void invalidCharacterFound(char c, int line, int col) throws CalculatorLexerException {
+    throw new CalculatorLexerException(
+        String.format(
+            "Invalid character found '%s' at index [%s, %s]",
+            c, line, col),
+        line, col);
   }
 }

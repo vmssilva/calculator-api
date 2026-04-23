@@ -13,5 +13,6 @@ public enum TokenType {
   COMMA,
   PERCENT,
   LPAREN,
-  RPAREN
+  RPAREN,
+  EXCLAMATION,
 }
