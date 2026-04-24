@@ -1,16 +1,14 @@
 package com.github.vmssilva.calculator.engine.runtime;
 
-import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Objects;
 
 import com.github.vmssilva.calculator.engine.ast.Node;
 import com.github.vmssilva.calculator.engine.context.ApplicationContext;
 import com.github.vmssilva.calculator.engine.exception.CalculatorException;
-import com.github.vmssilva.calculator.engine.exception.CalculatorLexerException;
-import com.github.vmssilva.calculator.engine.exception.CalculatorParserException;
-import com.github.vmssilva.calculator.engine.exception.CalculatorRuntimeException;
 import com.github.vmssilva.calculator.engine.parser.RecursiveAstParser;
+import com.github.vmssilva.calculator.engine.value.NumberValue;
+import com.github.vmssilva.calculator.engine.value.Value;
 import com.github.vmssilva.calculator.engine.value.Values;
 
 public class CalculatorRuntime {
@@ -30,30 +28,25 @@ public class CalculatorRuntime {
     System.out.println(Values.asNumber(node));
   }
 
-  public BigDecimal evaluate(String expression, ApplicationContext context) throws CalculatorException {
-
+  public Value evaluate(String expression, ApplicationContext context) {
     try {
-      BigDecimal result = Values.asNumber(new RecursiveAstParser().parse(expression).interpret(context));
-      int scale = result.scale();
+      var result = new RecursiveAstParser()
+          .parse(expression)
+          .interpret(context);
 
-      if (context.has("scale"))
-        scale = Values.asNumber(context.get("scale")).intValue();
+      if (result instanceof NumberValue && context.has("scale")) {
+        int scale = Values.asNumber(context.get("scale")).intValue();
+        result = new NumberValue(Values.asNumber(result).setScale(scale, RoundingMode.HALF_UP));
+      }
 
-      return result.setScale(scale, RoundingMode.HALF_UP);
+      return result;
 
-    } catch (CalculatorRuntimeException re) {
-      throw new CalculatorRuntimeException(re.getMessage());
-    } catch (CalculatorParserException pe) {
-      throw new CalculatorParserException(pe.getMessage());
-    } catch (CalculatorLexerException le) {
-      throw new CalculatorLexerException(le.getMessage());
-    } catch (RuntimeException e) {
-      throw new CalculatorException("Unknon error");
+    } catch (CalculatorException e) {
+      throw e;
     }
-
   }
 
-  public BigDecimal evaluate(String expression) {
+  public Value evaluate(String expression) {
     return evaluate(expression, this.context);
   }
 

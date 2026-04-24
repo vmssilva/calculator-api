@@ -13,22 +13,28 @@ public record BinaryExpression(Node left, Node right, String operator) implement
   public Value interpret(ApplicationContext context) {
     return switch (operator) {
       case "+" ->
-        ((FunctionValue) context.getFunction("add")).apply(List.of(left.interpret(context), right.interpret(context)));
+        ((FunctionValue) context.get("add")).apply(List.of(left.interpret(context), right.interpret(context)));
       case "-" ->
-        ((FunctionValue) context.getFunction("subtract"))
+        ((FunctionValue) context.get("subtract"))
             .apply(List.of(left.interpret(context), right.interpret(context)));
       case "*" ->
-        ((FunctionValue) context.getFunction("multiply"))
+        ((FunctionValue) context.get("multiply"))
             .apply(List.of(left.interpret(context), right.interpret(context)));
       case "/" ->
-        ((FunctionValue) context.getFunction("divide"))
+        ((FunctionValue) context.get("divide"))
             .apply(List.of(left.interpret(context), right.interpret(context)));
       case "%" ->
-        ((FunctionValue) context.getFunction("remainder"))
+        ((FunctionValue) context.get("remainder"))
             .apply(List.of(left.interpret(context), right.interpret(context)));
       case "^" ->
-        ((FunctionValue) context.getFunction("pow")).apply(List.of(left.interpret(context), right.interpret(context)));
+        ((FunctionValue) context.get("pow")).apply(List.of(left.interpret(context), right.interpret(context)));
       default -> throw new UnsupportedOperationException("Invalid operation: " + operator);
     };
+  }
+
+  @Override
+  public final String toString() {
+    return left.toString() + " " + operator + " " + right.toString();
+
   }
 }

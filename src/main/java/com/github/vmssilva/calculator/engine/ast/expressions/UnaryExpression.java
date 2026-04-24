@@ -18,4 +18,9 @@ public record UnaryExpression(String operator, Node right) implements Node {
     };
   }
 
+  @Override
+  public final String toString() {
+    return operator + right.toString();
+  }
+
 }

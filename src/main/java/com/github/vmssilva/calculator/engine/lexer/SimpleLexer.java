@@ -35,6 +35,11 @@ public final class SimpleLexer implements Lexer {
       advance();
     }
 
+    if (Character.isWhitespace(c)) {
+      advance();
+      return;
+    }
+
     if (String.valueOf(c).isBlank()) {
       advance();
       return;
@@ -59,7 +64,14 @@ public final class SimpleLexer implements Lexer {
     }
 
     if (c == '-') {
-      addToken(TokenType.MINUS, String.valueOf(c));
+      if (!isAtEnd() && peekNext() == '>') {
+        advance();
+        advance();
+        addToken(TokenType.ARROW, "->");
+        return;
+      }
+
+      addToken(TokenType.MINUS, "-");
       advance();
       return;
     }

@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import com.github.vmssilva.calculator.engine.ast.FunctionCallNode;
 import com.github.vmssilva.calculator.engine.ast.IdentifierNode;
+import com.github.vmssilva.calculator.engine.ast.LambdaNode;
 import com.github.vmssilva.calculator.engine.ast.Node;
 import com.github.vmssilva.calculator.engine.ast.ProgramNode;
 import com.github.vmssilva.calculator.engine.ast.VarNode;
@@ -23,6 +24,7 @@ public final class RecursiveAstParser implements Parser {
 
   private final Lexer lexer;
   private List<Token> tokens;
+  private int line = 0;
   private int pos = 0;
 
   public RecursiveAstParser() {
@@ -54,29 +56,14 @@ public final class RecursiveAstParser implements Parser {
   }
 
   private Node statement() {
-
-    if (isAssignment()) {
-      var declaration = parseDeclaration();
-
-      if (!isAstEnd()) {
-        expect(TokenType.SEMICOLON);
-        advance();
-      }
-      return declaration;
-    }
-
-    return parseExpression();
-  }
-
-  private Node parseExpression() {
-    var expression = expression();
+    Node node = parseAssignment();
 
     if (!isAstEnd()) {
       expect(TokenType.SEMICOLON);
       advance();
     }
 
-    return expression;
+    return node;
   }
 
   private Node expression() {
@@ -134,108 +121,122 @@ public final class RecursiveAstParser implements Parser {
   }
 
   private Node factor() {
-    Node expr = null;
 
-    // Signed expressions
+    // 1. unary
     if (match(TokenType.PLUS, TokenType.MINUS)) {
-      Token operator = advance();
-
-      if (isOperator())
-        syntaxError(0, pos);
-
-      Node right = factor();
-      expr = new UnaryExpression(operator.value(), right);
-
-      return expr;
+      String op = advance().value();
+      return new UnaryExpression(op, factor());
     }
 
-    if (match(TokenType.IDENTIFIER)) {
-
-      if (isFunction())
-        return parseCallFunction();
-
-      if (isAssignment())
-        return parseDeclaration();
-
-      return parseIdentifier();
-    }
-
-    if (match(TokenType.NUMBER)) {
-      Token token = advance();
-      var value = new BigDecimal(token.value());
-      expr = new NumberExpression(value);
-
-      if (match(TokenType.LPAREN))
-        syntaxError(0, pos);
-
-    }
-
+    // 2. grouping OR lambda
     if (match(TokenType.LPAREN)) {
       advance();
 
-      if (isAstEnd())
-        syntaxError(0, pos);
+      List<Node> parts = new ArrayList<>();
 
-      expr = expression();
+      if (!match(TokenType.RPAREN)) {
+        parts.add(expression());
 
-      if (!(match(TokenType.RPAREN)))
-        syntaxError(0, pos);
+        while (match(TokenType.COMMA)) {
+          advance();
+          parts.add(expression());
+        }
+      }
 
-      // Skipping token LPAREN
+      expect(TokenType.RPAREN);
       advance();
 
+      // lambda
+      if (match(TokenType.ARROW)) {
+        advance();
+
+        List<String> params = parts.stream()
+            .map(n -> {
+              if (!(n instanceof IdentifierNode id)) {
+                throw new CalculatorParserException("Invalid lambda parameter", line, pos);
+              }
+              return id.name();
+            })
+            .toList();
+
+        return new LambdaNode(params, expression());
+      }
+
+      // grouping
+      if (parts.size() == 1) {
+        return parts.get(0);
+      }
+
+      throw new CalculatorParserException("Invalid grouped expression", line, pos);
     }
 
-    if (expr == null)
-      syntaxError(0, pos);
+    // 3. function call
+    if (match(TokenType.IDENTIFIER) && peekNext().type() == TokenType.LPAREN) {
+      String name = advance().value();
 
-    return expr;
-  }
+      advance(); // (
 
-  private Node parseIdentifier() {
-    return new IdentifierNode(advance().value());
-  }
+      List<Node> args = new ArrayList<>();
 
-  private Node parseDeclaration() {
-    var identifier = advance();
-    advance();
-    var expression = expression();
+      if (!match(TokenType.RPAREN)) {
+        args.add(expression());
 
-    return new VarNode(identifier.value(), expression);
-  }
+        while (match(TokenType.COMMA)) {
+          advance();
+          args.add(expression());
+        }
+      }
 
-  private Node parseCallFunction() {
-    List<Node> args = new ArrayList<>();
-
-    var identifier = advance();
-
-    expect(TokenType.LPAREN);
-    advance(); // LPAREN
-
-    if (match(TokenType.RPAREN)) {
+      expect(TokenType.RPAREN);
       advance();
-      return new FunctionCallNode(identifier.value(), List.of());
+
+      return new FunctionCallNode(new IdentifierNode(name), args);
     }
 
-    args.add(expression());
-
-    while (match(TokenType.COMMA)) {
-      advance();
-      args.add(expression());
+    // 4. identifier
+    if (match(TokenType.IDENTIFIER)) {
+      return new IdentifierNode(advance().value());
     }
 
-    expect(TokenType.RPAREN);
-    advance();
+    // 5. number
+    if (match(TokenType.NUMBER)) {
+      return new NumberExpression(new BigDecimal(advance().value()));
+    }
 
-    return new FunctionCallNode(identifier.value(), args);
+    throw new CalculatorParserException("Unexpected token in factor", line, pos);
   }
 
-  private boolean isAssignment() {
-    return peek().type() == TokenType.IDENTIFIER && peekNext().type() == TokenType.EQUAL;
-  }
+  private Node parseAssignment() {
+    Node left = expression();
 
-  private boolean isFunction() {
-    return peek().type() == TokenType.IDENTIFIER && peekNext().type() == TokenType.LPAREN;
+    if (match(TokenType.EQUAL)) {
+      advance(); // consume '='
+
+      Node right = parseAssignment(); // right-associative
+
+      // caso 1: variável simples
+      if (left instanceof IdentifierNode id) {
+        return new VarNode(id.name(), right);
+      }
+
+      // caso 2: definição de função (syntactic sugar)
+      if (left instanceof FunctionCallNode call &&
+          call.target() instanceof IdentifierNode fn &&
+          call.args().stream().allMatch(arg -> arg instanceof IdentifierNode)) {
+
+        List<String> params = call.args().stream()
+            .map(arg -> ((IdentifierNode) arg).name())
+            .toList();
+
+        return new VarNode(
+            fn.name(),
+            new LambdaNode(params, right));
+      }
+
+      throw new CalculatorParserException("Invalid assignment target", line, pos);
+    }
+
+    return left;
   }
 
   private boolean isOperator() {
@@ -289,8 +290,7 @@ public final class RecursiveAstParser implements Parser {
 
   private void syntaxError(int line, int col) {
 
-    StringBuilder message = new StringBuilder();
-    message.append("SyntaxError near index [").append(line).append(", ").append(col).append("]");
+    StringBuilder message = new StringBuilder("Syntax error: invalid syntax");
 
     if (!tokens.isEmpty()) {
       StringBuilder sb = new StringBuilder(
@@ -298,10 +298,11 @@ public final class RecursiveAstParser implements Parser {
               .collect(Collectors.joining("")));
 
       sb.insert(pos, "^");
-      message.append(" ").append(sb);
+      message.append(" near '").append(sb).append("'");
+      message.append(" at ").append("index [").append(line).append(", ").append(col).append("]");
 
     } else {
-      message.append(" expression can't be null");
+      message.append(" expression can't be empty");
     }
 
     error(message.toString(), line, col);
