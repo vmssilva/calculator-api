@@ -21,7 +21,7 @@ public record FunctionCallNode(Node target, List<Node> args) implements Node {
         .map(arg -> arg.interpret(context))
         .toList();
 
-    return fn.apply(evaluated);
+    return fn.apply(context, evaluated);
   }
 
   @Override

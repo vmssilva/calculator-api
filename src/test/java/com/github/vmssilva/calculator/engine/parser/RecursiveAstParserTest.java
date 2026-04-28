@@ -183,7 +183,13 @@ class RecursiveAstParserTest {
   @Test
   @DisplayName("Should calculate modulo")
   void testModulo() {
-    assertEquals(expect(1.0), eval("10%3"));
+    assertEquals(expect(1.0), eval("remainder(10,3)"));
+  }
+
+  @Test
+  @DisplayName("Should calculate percentage")
+  void testPercentage() {
+    assertEquals(expect(1560.0), eval("1200 * (1 + 0.30)"));
   }
 
   @Test
