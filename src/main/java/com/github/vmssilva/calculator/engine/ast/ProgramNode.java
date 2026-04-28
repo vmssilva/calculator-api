@@ -10,8 +10,7 @@ public record ProgramNode(List<Node> nodes) implements Node {
   @Override
   public Value interpret(ApplicationContext context) {
 
-    return nodes.stream().filter(Objects::nonNull)
-        .map(node -> node.interpret(context))
+    return nodes.stream().filter(n -> Objects.nonNull(n)).map(node -> node.interpret(context))
         .reduce((first, second) -> second).orElse(null);
   }
 }

@@ -1,7 +1,5 @@
 package com.github.vmssilva.calculator.engine.ast.expressions;
 
-import java.math.BigDecimal;
-
 import com.github.vmssilva.calculator.engine.ast.Node;
 import com.github.vmssilva.calculator.engine.context.ApplicationContext;
 import com.github.vmssilva.calculator.engine.value.NumberValue;
@@ -18,6 +16,11 @@ public record UnaryExpression(String operator, Node right) implements Node {
       default -> throw new UnsupportedOperationException("Invalid unary operator: "
           + operator);
     };
+  }
+
+  @Override
+  public final String toString() {
+    return operator + right.toString();
   }
 
 }

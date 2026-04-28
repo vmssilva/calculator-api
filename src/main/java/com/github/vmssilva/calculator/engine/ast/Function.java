@@ -1,10 +1,11 @@
 package com.github.vmssilva.calculator.engine.ast;
 
-import java.math.BigDecimal;
 import java.util.List;
 
+import com.github.vmssilva.calculator.engine.context.ApplicationContext;
 import com.github.vmssilva.calculator.engine.value.Value;
 
-public interface Function {
-  BigDecimal apply(List<Value> args);
+public interface Function<K, R> {
+  Value apply(ApplicationContext context, List<Value> args);
+
 }

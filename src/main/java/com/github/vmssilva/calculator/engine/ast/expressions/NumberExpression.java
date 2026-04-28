@@ -13,4 +13,9 @@ public record NumberExpression(BigDecimal value) implements Node {
   public Value interpret(ApplicationContext context) {
     return new NumberValue(value);
   }
+
+  @Override
+  public final String toString() {
+    return value.toString();
+  }
 }

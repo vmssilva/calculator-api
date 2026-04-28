@@ -1,28 +1,36 @@
 package com.github.vmssilva.calculator.engine.context;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
+import java.util.ArrayDeque;
+import java.util.Collections;
+import java.util.Deque;
 import java.util.HashMap;
-import java.util.List;
+import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Stack;
 
+import com.github.vmssilva.calculator.engine.exception.CalculatorRuntimeException;
+import com.github.vmssilva.calculator.engine.std.functions.BuiltinFunction;
+import com.github.vmssilva.calculator.engine.std.constants.Constants;
 import com.github.vmssilva.calculator.engine.value.FunctionValue;
-import com.github.vmssilva.calculator.engine.value.NumberValue;
 import com.github.vmssilva.calculator.engine.value.Value;
-import com.github.vmssilva.calculator.engine.value.Values;
 
 public class ApplicationContext {
 
-  private Stack<Scope> scopes = new Stack<>();
-  private Map<String, String> alias = new HashMap<>();
+  private Deque<Scope> scopes = new ArrayDeque<>();
+  private final Scope builtins;
 
   public ApplicationContext() {
-    var builtins = new Scope(null);
-
+    this.builtins = new Scope(null);
     loadBuiltin(builtins);
     var global = new Scope(builtins);
     this.scopes.push(new Scope(global));
+  }
+
+  public Scope getBuiltins() {
+    return builtins;
+  }
+
+  public boolean remove(String name) {
+    return peek().remove(name);
   }
 
   public void pushScope() {
@@ -39,184 +47,118 @@ public class ApplicationContext {
   }
 
   public Value get(String name) {
-    if (alias.containsKey(name))
-      return scopes.peek().get(alias.get(name));
-
     return scopes.peek().get(name);
   }
 
-  public Scope scope() {
-    return peek();
-  }
-
-  public boolean has(String name) {
-    if (scope().has(name))
-      return true;
-
-    if (peek().parent != null)
-      return scope().parent.has(name);
-
-    return false;
+  public void addFunction(String name, FunctionValue fn) {
+    peek().set(name, fn);
   }
 
   private Scope peek() {
     return scopes.peek();
   }
 
+  public boolean has(String name) {
+    if (peek().has(name))
+      return true;
+
+    if (peek().parent != null)
+      return peek().parent.has(name);
+
+    return false;
+  }
+
   private class Scope {
     private Scope parent;
-    private Map<String, Value> map;
+    private Map<String, Value> values;
 
     private Scope(Scope parent) {
       this.parent = parent;
-      this.map = new HashMap<>();
+      this.values = new HashMap<>();
+    }
+
+    public void set(String name, Value value) {
+      values.put(name, value);
     }
 
     public Value get(String name) {
       if (has(name))
-        return map.get(name);
+        return values.get(name);
 
       if (parent != null)
         return parent.get(name);
 
-      throw new RuntimeException(name + " is not defined");
-    }
-
-    public void set(String name, Value value) {
-      map.put(name, value);
+      throw new CalculatorRuntimeException("Execution error: '" + name + "' is not defined");
     }
 
     public boolean has(String name) {
-      if (map.containsKey(name))
+      if (values.containsKey(name))
         return true;
 
       return false;
     }
+
+    public Map<String, Value> entries() {
+      return Collections.unmodifiableMap(values);
+    }
+
+    public Scope parent() {
+      return parent;
+    }
+
+    public boolean remove(String name) {
+      if (parent == null) { // root/builtins layer protection
+        return false;
+      }
+
+      return values.remove(name) != null;
+    }
   }
 
-  private void assertUnaryFunction(List<Value> args) {
-    asserNumArgs(args, 1);
-  }
+  public Map<String, Value> flatten() {
+    Map<String, Value> result = new LinkedHashMap<>();
 
-  private void assertBinaryFunction(List<Value> args) {
-    asserNumArgs(args, 2);
-  }
+    Scope current = scopes.peek();
 
-  private void asserNumArgs(List<Value> args, int count) {
-    if (args.isEmpty())
-      throw new IllegalArgumentException("Missing operands");
+    while (current != null) {
+      for (var entry : current.entries().entrySet()) {
+        result.putIfAbsent(entry.getKey(), entry.getValue());
+      }
+      current = current.parent();
+    }
 
-    if (args.size() < count)
-      throw new IllegalArgumentException("Missing right operand");
-
-    if (args.size() > count)
-      throw new IllegalArgumentException("Too much arguments");
-
+    return result;
   }
 
   private void loadBuiltin(Scope builtins) {
-    builtins.set("PI", new NumberValue(new BigDecimal(Math.PI)));
-    builtins.set("E", new NumberValue(new BigDecimal(Math.E)));
 
-    builtins.set("add", (FunctionValue) args -> {
-      assertBinaryFunction(args);
-      var left = Values.asNumber(args.get(0));
-      var right = Values.asNumber(args.get(1));
-      return new NumberValue(left.add(right));
-    });
+    for (Constants constant : Constants.values()) {
+      builtins.set(constant.key(), constant.value());
+    }
 
-    builtins.set("subtract", (FunctionValue) args -> {
-      assertBinaryFunction(args);
-      var left = Values.asNumber(args.get(0));
-      var right = Values.asNumber(args.get(1));
-      return new NumberValue(left.subtract(right));
-    });
+    for (BuiltinFunction fn : BuiltinFunction.values()) {
+      builtins.set(fn.key(), fn.create(this));
+    }
 
-    builtins.set("multiply", (FunctionValue) args -> {
-      assertBinaryFunction(args);
-      var left = Values.asNumber(args.get(0));
-      var right = Values.asNumber(args.get(1));
-      return new NumberValue(left.multiply(right));
-    });
+    // builtins.set("functions", fn(args -> {
 
-    builtins.set("divide", (FunctionValue) args -> {
-      assertBinaryFunction(args);
-      var left = Values.asNumber(args.get(0));
-      var right = Values.asNumber(args.get(1));
-      return new NumberValue(left.divide(right, 10, RoundingMode.HALF_UP));
-    });
+    // if (!args.isEmpty()) {
+    // throw new ErrorValueException("functions() takes no arguments");
+    // }
 
-    builtins.set("remainder", (FunctionValue) args -> {
-      assertBinaryFunction(args);
-      var left = Values.asNumber(args.get(0));
-      var right = Values.asNumber(args.get(1));
-      return new NumberValue(left.remainder(right));
-    });
+    // System.out.println("Built-in functions:");
 
-    builtins.set("abs", (FunctionValue) args -> {
-      assertUnaryFunction(args);
-      var value = Values.asNumber(args.get(0));
-      return new NumberValue(value.abs());
-    });
+    // for (var entry : getBuiltins().entries().entrySet()) {
+    // var name = entry.getKey();
+    // var value = entry.getValue();
 
-    builtins.set("negate", (FunctionValue) args -> {
-      assertUnaryFunction(args);
-      var value = Values.asNumber(args.get(0));
-      return new NumberValue(value.negate());
-    });
+    // if (value instanceof BaseFunctionValue fn) {
+    // System.out.println(name + " => " + fn);
+    // }
+    // }
 
-    builtins.set("pow", (FunctionValue) args -> {
-      assertBinaryFunction(args);
-      var left = Values.asNumber(args.get(0));
-      var right = Values.asNumber(args.get(1));
-      return new NumberValue(left.pow(right.intValue()));
-    });
+    // return new NumberValue(BigDecimal.ZERO);
 
-    builtins.set("sqrt", (FunctionValue) args -> {
-      assertUnaryFunction(args);
-      var value = Values.asNumber(args.get(0));
-      return new NumberValue(new BigDecimal(Math.sqrt(value.doubleValue())));
-    });
-
-    builtins.set("sin", (FunctionValue) args -> {
-      assertUnaryFunction(args);
-      var value = Values.asNumber(args.get(0));
-      return new NumberValue(new BigDecimal(Math.sin(value.doubleValue())));
-    });
-
-    builtins.set("tan", (FunctionValue) args -> {
-      assertUnaryFunction(args);
-      var value = Values.asNumber(args.get(0));
-      return new NumberValue(new BigDecimal(Math.tan(value.doubleValue())));
-    });
-
-    builtins.set("cos", (FunctionValue) args -> {
-      assertUnaryFunction(args);
-      var value = Values.asNumber(args.get(0));
-      return new NumberValue(new BigDecimal(Math.cos(value.doubleValue())));
-    });
-
-    builtins.set("log", (FunctionValue) args -> {
-      assertUnaryFunction(args);
-      var value = Values.asNumber(args.get(0));
-      return new NumberValue(new BigDecimal(Math.log(value.doubleValue())));
-    });
-
-    builtins.set("floor", (FunctionValue) args -> {
-      assertUnaryFunction(args);
-      var value = Values.asNumber(args.get(0));
-      return new NumberValue(new BigDecimal(Math.floor(value.doubleValue())));
-    });
-
-    builtins.set("ceil", (FunctionValue) args -> {
-      assertUnaryFunction(args);
-      var value = Values.asNumber(args.get(0));
-      return new NumberValue(new BigDecimal(Math.ceil(value.doubleValue())));
-    });
-
-    alias.put("mod", "remainder");
-    alias.put("div", "divide");
-    alias.put("sub", "subtract");
+    // }, "functions()", false));
   }
-
 }
