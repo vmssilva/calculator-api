@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
 
-import com.github.vmssilva.calculator.engine.exception.ErrorValueException;
+import com.github.vmssilva.calculator.engine.exception.ValueErrorException;
 import com.github.vmssilva.calculator.engine.value.FunctionValue;
 import com.github.vmssilva.calculator.engine.value.NumberValue;
 import com.github.vmssilva.calculator.engine.value.Value;
@@ -34,7 +34,7 @@ public final class MathFunctions {
       var l = Values.asNumber(args.get(0));
       var r = Values.asNumber(args.get(1));
       return new NumberValue(l.add(r));
-    }, binaryNumericExpression());
+    }, binaryNumericExpression(), true);
   }
 
   public static FunctionValue subtract() {
@@ -65,7 +65,7 @@ public final class MathFunctions {
       var r = Values.asNumber(args.get(1));
 
       if (r.compareTo(BigDecimal.ZERO) == 0) {
-        throw new ErrorValueException("division by zero");
+        throw new ValueErrorException("division by zero");
       }
 
       return new NumberValue(
@@ -161,7 +161,7 @@ public final class MathFunctions {
       var v = Values.asNumber(args.get(0));
 
       if (v.compareTo(BigDecimal.ZERO) < 0) {
-        throw new ErrorValueException("sqrt of negative number");
+        throw new ValueErrorException("sqrt of negative number");
       }
 
       return new NumberValue(
@@ -177,7 +177,7 @@ public final class MathFunctions {
       var v = Values.asNumber(args.get(0));
 
       if (v.compareTo(BigDecimal.ZERO) <= 0) {
-        throw new ErrorValueException("log of non-positive number");
+        throw new ValueErrorException("log of non-positive number");
       }
 
       return new NumberValue(
@@ -237,7 +237,7 @@ public final class MathFunctions {
       var x = Values.asNumber(args.get(0));
 
       if (x.compareTo(BigDecimal.ZERO) <= 0) {
-        throw new ErrorValueException("ln of non-positive number");
+        throw new ValueErrorException("ln of non-positive number");
       }
 
       return new NumberValue(
@@ -252,7 +252,7 @@ public final class MathFunctions {
       var x = Values.asNumber(args.get(0));
 
       if (x.compareTo(BigDecimal.ZERO) <= 0) {
-        throw new ErrorValueException("log10 of non-positive number");
+        throw new ValueErrorException("log10 of non-positive number");
       }
 
       return new NumberValue(
@@ -416,23 +416,23 @@ public final class MathFunctions {
       var value = Values.asNumber(args.get(0));
 
       if (value.compareTo(BigDecimal.ZERO) < 0) {
-        throw new ErrorValueException("factorial of negative number");
+        throw new ValueErrorException("factorial of negative number");
       }
 
       if (value.stripTrailingZeros().scale() > 0) {
-        throw new ErrorValueException("factorial only defined for integers");
+        throw new ValueErrorException("factorial only defined for integers");
       }
 
       int n;
       try {
         n = value.intValueExact();
       } catch (ArithmeticException e) {
-        throw new ErrorValueException("number too large");
+        throw new ValueErrorException("number too large");
       }
 
       int max = 1000;
       if (n > max) {
-        throw new ErrorValueException("factorial too large");
+        throw new ValueErrorException("factorial too large");
       }
 
       BigInteger result = BigInteger.ONE;

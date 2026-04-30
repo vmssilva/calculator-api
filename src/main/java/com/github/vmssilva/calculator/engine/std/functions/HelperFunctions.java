@@ -3,7 +3,7 @@ package com.github.vmssilva.calculator.engine.std.functions;
 import java.math.BigDecimal;
 import java.util.Map;
 
-import com.github.vmssilva.calculator.engine.exception.ErrorValueException;
+import com.github.vmssilva.calculator.engine.exception.ValueErrorException;
 import com.github.vmssilva.calculator.engine.std.ValueType;
 import com.github.vmssilva.calculator.engine.value.FunctionValue;
 import com.github.vmssilva.calculator.engine.value.NumberValue;
@@ -15,11 +15,11 @@ public class HelperFunctions {
     return FunctionFactory.of("unset", (context, args) -> {
 
       if (args.size() != 1) {
-        throw new ErrorValueException("unset(name) expects 1 argument");
+        throw new ValueErrorException("unset(name) expects 1 argument");
       }
 
       if (args.get(0).type() != ValueType.STRING) {
-        throw new ErrorValueException("unset expect String argument");
+        throw new ValueErrorException("unset expect String argument");
       }
 
       var name = Values.asString(args.get(0));
@@ -27,7 +27,7 @@ public class HelperFunctions {
       boolean removed = context.remove(name);
 
       if (!removed) {
-        throw new ErrorValueException("variable '" + name + "' not found in current scope");
+        throw new ValueErrorException("variable '" + name + "' not found in current scope");
       }
 
       return new NumberValue(BigDecimal.ZERO);
@@ -39,7 +39,7 @@ public class HelperFunctions {
   public static FunctionValue env() {
     return FunctionFactory.of("env", (context, args) -> {
       if (!args.isEmpty()) {
-        throw new ErrorValueException("env() takes no arguments");
+        throw new ValueErrorException("env() takes no arguments");
       }
 
       System.out.println("Environment:");

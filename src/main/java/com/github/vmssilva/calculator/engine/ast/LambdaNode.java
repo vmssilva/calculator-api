@@ -4,8 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.github.vmssilva.calculator.engine.context.ApplicationContext;
-import com.github.vmssilva.calculator.engine.std.functions.FunctionMeta;
-import com.github.vmssilva.calculator.engine.std.functions.Parameter;
+import com.github.vmssilva.calculator.engine.exception.ValueErrorException;
 import com.github.vmssilva.calculator.engine.std.ValueType;
 import com.github.vmssilva.calculator.engine.utils.Validators;
 import com.github.vmssilva.calculator.engine.value.FunctionValue;
@@ -16,13 +15,9 @@ public record LambdaNode(List<String> params, Node body) implements Node {
   @Override
   public Value interpret(ApplicationContext context) {
 
-    FunctionMeta meta = new FunctionMeta(
-        "<lambda>",
-        params.stream()
-            .map(p -> new Parameter(p, ValueType.ANY))
-            .toList(),
-        "user lambda",
-        false);
+    if (body instanceof LambdaNode) {
+      throw new ValueErrorException("Invalid syntax: lambda is not a valid body expression");
+    }
 
     return new FunctionValue() {
 
@@ -46,11 +41,27 @@ public record LambdaNode(List<String> params, Node body) implements Node {
         }
       }
 
+      public String format(Node node) {
+        String type = "Any";
+
+        if (node instanceof LambdaNode lambda) {
+          String params = lambda.params().stream()
+              .map(p -> p + ": " + type)
+              .collect(Collectors.joining(", "));
+
+          return "(" + params + ") -> " + format(lambda.body());
+        }
+
+        return node.toString();
+      }
+
       @Override
       public String toString() {
+
         return "("
-            + meta.params().stream().map(m -> m.name() + ": " + m.type().value()).collect(Collectors.joining(", "))
-            + ") -> " + body;
+            + params.stream().map(m -> m + ": Any").collect(Collectors.joining(", "))
+            + ") -> "
+            + format(body);
       }
 
       @Override
@@ -72,7 +83,7 @@ public record LambdaNode(List<String> params, Node body) implements Node {
 
       @Override
       public String name() {
-        return "lambda";
+        return "<lambda>";
       }
     };
   }

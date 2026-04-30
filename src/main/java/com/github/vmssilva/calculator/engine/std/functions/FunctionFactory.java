@@ -15,7 +15,12 @@ public final class FunctionFactory {
   }
 
   public static FunctionValue of(String name, Function<List<Value>, Value> impl, ValueType[] parameters) {
-    return new BaseFunctionValue(parameters) {
+    return of(name, impl, parameters, false);
+  }
+
+  public static FunctionValue of(String name, Function<List<Value>, Value> impl, ValueType[] parameters,
+      boolean curried) {
+    return new BaseFunctionValue(parameters, curried) {
 
       @Override
       public Value apply(ApplicationContext context, List<Value> args) {
