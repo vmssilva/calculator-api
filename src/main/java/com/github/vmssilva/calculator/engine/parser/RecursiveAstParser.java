@@ -43,13 +43,14 @@ public final class RecursiveAstParser implements Parser {
   }
 
   private Node parseProgram() {
-    List<Node> nodes = new ArrayList<>();
+    ArrayList<Node> nodes = new ArrayList<>();
 
     if (tokens.isEmpty())
       syntaxError(0, pos);
 
     while (!isAstEnd()) {
-      nodes.add(statement());
+      var stmt = statement();
+      nodes.add(stmt);
     }
 
     return new ProgramNode(nodes);
@@ -146,6 +147,8 @@ public final class RecursiveAstParser implements Parser {
       expect(TokenType.RPAREN);
       advance();
 
+      Node body = null;
+
       // lambda
       if (match(TokenType.ARROW)) {
         advance();
@@ -159,43 +162,25 @@ public final class RecursiveAstParser implements Parser {
             })
             .toList();
 
-        return new LambdaNode(params, expression());
+        body = factor();
+
+        Node lambda = new LambdaNode(params, body);
+
+        return parseCall(lambda);
+
       }
 
       // grouping
       if (parts.size() == 1) {
-        return parts.get(0);
+        return parseCall(parts.get(0));
       }
-
       throw new CalculatorParserException("Invalid grouped expression", line, pos);
-    }
-
-    // 3. function call
-    if (match(TokenType.IDENTIFIER) && peekNext().type() == TokenType.LPAREN) {
-      String name = advance().value();
-
-      advance(); // (
-
-      List<Node> args = new ArrayList<>();
-
-      if (!match(TokenType.RPAREN)) {
-        args.add(expression());
-
-        while (match(TokenType.COMMA)) {
-          advance();
-          args.add(expression());
-        }
-      }
-
-      expect(TokenType.RPAREN);
-      advance();
-
-      return new FunctionCallNode(new IdentifierNode(name), args);
     }
 
     // 4. identifier
     if (match(TokenType.IDENTIFIER)) {
-      return new IdentifierNode(advance().value());
+      Node id = new IdentifierNode(advance().value());
+      return parseCall(id);
     }
 
     // 5. number
@@ -214,12 +199,12 @@ public final class RecursiveAstParser implements Parser {
 
       Node right = parseAssignment(); // right-associative
 
-      // caso 1: variável simples
+      // case 1: Simple definition
       if (left instanceof IdentifierNode id) {
         return new VarNode(id.name(), right);
       }
 
-      // caso 2: definição de função (syntactic sugar)
+      // case 2: function definition (syntactic sugar)
       if (left instanceof FunctionCallNode call &&
           call.target() instanceof IdentifierNode fn &&
           call.args().stream().allMatch(arg -> arg instanceof IdentifierNode)) {
@@ -237,6 +222,31 @@ public final class RecursiveAstParser implements Parser {
     }
 
     return left;
+  }
+
+  private Node parseCall(Node callee) {
+
+    while (match(TokenType.LPAREN)) {
+      advance(); // (
+
+      List<Node> args = new ArrayList<>();
+
+      if (!match(TokenType.RPAREN)) {
+        args.add(expression());
+
+        while (match(TokenType.COMMA)) {
+          advance();
+          args.add(expression());
+        }
+      }
+
+      expect(TokenType.RPAREN);
+      advance();
+
+      callee = new FunctionCallNode(callee, args);
+    }
+
+    return callee;
   }
 
   private boolean isOperator() {
@@ -274,10 +284,6 @@ public final class RecursiveAstParser implements Parser {
 
   private Token peek() {
     return peek(0);
-  }
-
-  private Token peekNext() {
-    return peek(1);
   }
 
   private boolean isAstEnd() {
