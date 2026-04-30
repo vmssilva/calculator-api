@@ -2,7 +2,6 @@ package com.github.vmssilva.calculator.engine.std.functions;
 
 import java.util.List;
 
-import com.github.vmssilva.calculator.engine.ast.Function;
 import com.github.vmssilva.calculator.engine.context.ApplicationContext;
 import com.github.vmssilva.calculator.engine.std.ValueType;
 import com.github.vmssilva.calculator.engine.value.BaseFunctionValue;
