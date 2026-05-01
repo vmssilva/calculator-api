@@ -11,6 +11,7 @@ public record FunctionCallNode(Node target, List<Node> args) implements Node {
 
   @Override
   public Value interpret(ApplicationContext context) {
+
     Value value = target.interpret(context);
 
     if (!(value instanceof FunctionValue fn)) {

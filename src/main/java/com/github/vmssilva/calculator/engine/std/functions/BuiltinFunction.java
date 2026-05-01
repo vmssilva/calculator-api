@@ -53,7 +53,7 @@ public enum BuiltinFunction {
   COS("cos", "Cosine", MathFunctions::cos),
   TAN("tan", "Tangent", MathFunctions::tan),
   DEG("deg", "Radians to degrees", MathFunctions::deg),
-  RAD("rad", "Degress to radians", MathFunctions::rad),
+  RAD("rad", "Degrees to radians", MathFunctions::rad),
   SIGN("sign", "Sign of number (-1, 0, 1)", MathFunctions::sign);
 
   private final String name;
