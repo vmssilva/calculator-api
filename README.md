@@ -1,4 +1,4 @@
-# CalculatorApp – Recursive Parser Study Project
+# Calculator Engine – Recursive Parser & Runtime Study Project
 
 A Java-based expression engine built as a **study project for parsing, AST interpretation, and runtime execution**, evolving into a lightweight **expression language runtime**.
 
