@@ -35,7 +35,7 @@ public final class MathFunctions {
       var r = Values.asNumber(args.get(1));
 
       return new NumberValue(l.add(r));
-    }, binaryNumericExpression(), true);
+    }, binaryNumericExpression());
   }
 
   public static FunctionValue subtract() {

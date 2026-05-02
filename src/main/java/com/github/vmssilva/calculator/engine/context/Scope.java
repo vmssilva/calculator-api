@@ -17,16 +17,12 @@ public class Scope {
     this.values = new HashMap<>();
   }
 
-  // -------------------------
   // Assignment (local scope)
-  // -------------------------
   public void set(String name, Value value) {
     values.put(name, value);
   }
 
-  // -------------------------
   // Lookup (lexical scope)
-  // -------------------------
   public Value get(String name) {
     if (values.containsKey(name)) {
       return values.get(name);
@@ -40,9 +36,7 @@ public class Scope {
         "Execution error: '" + name + "' is not defined");
   }
 
-  // -------------------------
   // Existence check (lexical)
-  // -------------------------
   public boolean has(String name) {
     if (values.containsKey(name)) {
       return true;
@@ -51,9 +45,7 @@ public class Scope {
     return parent != null && parent.has(name);
   }
 
-  // -------------------------
   // Remove (lexical unset)
-  // -------------------------
   public boolean remove(String name) {
     if (values.containsKey(name)) {
       values.remove(name);
@@ -67,16 +59,12 @@ public class Scope {
     return false;
   }
 
-  // -------------------------
   // Introspection (debug / flatten)
-  // -------------------------
   public Map<String, Value> entries() {
     return Collections.unmodifiableMap(values);
   }
 
-  // -------------------------
   // Parent access (closures)
-  // -------------------------
   public Scope getParent() {
     return parent;
   }
@@ -85,65 +73,3 @@ public class Scope {
     this.parent = parent;
   }
 }
-
-// package com.github.vmssilva.calculator.engine.context;
-//
-// import java.util.Collections;
-// import java.util.HashMap;
-// import java.util.Map;
-//
-// import
-// com.github.vmssilva.calculator.engine.exception.CalculatorRuntimeException;
-// import com.github.vmssilva.calculator.engine.value.Value;
-//
-// public class Scope {
-// private Scope parent;
-// private Map<String, Value> values;
-//
-// public Scope(Scope parent) {
-// this.parent = parent;
-// this.values = new HashMap<>();
-// }
-//
-// public void set(String name, Value value) {
-// values.put(name, value);
-// }
-//
-// public void setParent(Scope parent) {
-// this.parent = parent;
-// }
-//
-// public Value get(String name) {
-// if (has(name))
-// return values.get(name);
-//
-// if (parent != null)
-// return parent.get(name);
-//
-// throw new CalculatorRuntimeException("Execution error: '" + name + "' is not
-// defined");
-// }
-//
-// public boolean has(String name) {
-// if (values.containsKey(name))
-// return true;
-//
-// return false;
-// }
-//
-// public Map<String, Value> entries() {
-// return Collections.unmodifiableMap(values);
-// }
-//
-// public Scope getParent() {
-// return parent;
-// }
-//
-// public boolean remove(String name) {
-// if (parent == null) { // root/builtins layer protection
-// return false;
-// }
-//
-// return values.remove(name) != null;
-// }
-// }

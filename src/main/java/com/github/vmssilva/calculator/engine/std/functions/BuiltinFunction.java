@@ -21,8 +21,8 @@ public enum BuiltinFunction {
   PERCENTAGE("percentage", "Calculate percentage of a number", MathFunctions::percentage),
 
   // Extras
-  ENV("env", "Displays enrironment", HelperFunctions::env),
-  UNSET("unset", "Remove identifier of current scope", HelperFunctions::unset),
+  ENV("env", "Displays enrironment", UtilFunctions::env),
+  UNSET("unset", "Remove identifier of current scope", UtilFunctions::unset),
   SUM("sum", "Sum all numbers", MathFunctions::sum),
   MIN("min", "Minimum value", MathFunctions::min),
   MAX("max", "Maximum value", MathFunctions::max),

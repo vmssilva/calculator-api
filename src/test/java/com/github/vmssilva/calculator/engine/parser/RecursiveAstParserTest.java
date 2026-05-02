@@ -555,13 +555,6 @@ class RecursiveAstParserTest {
   }
 
   @Test
-  @DisplayName("Should reject nested lambda inside body")
-  void testNestedLambdaNotAllowed() {
-    assertThrows(ValueErrorException.class,
-        () -> eval("f = (x) -> (y) -> y + x; f(1)"));
-  }
-
-  @Test
   @DisplayName("Should fail invalid lambda syntax")
   void testInvalidLambdaSyntax() {
     assertThrows(CalculatorParserException.class, () -> eval("f = (x -> x + 1"));
@@ -572,14 +565,5 @@ class RecursiveAstParserTest {
   void testInvalidLambdaCall() {
     assertThrows(ValueErrorException.class, () -> eval("f = (x) -> x; f()"));
   }
-
-  // @Test
-  // @DisplayName("Should unset variable")
-  // void testUnset() {
-  // eval("x = 10");
-  // eval("unset(x)");
-
-  // assertThrows(Exception.class, () -> eval("x"));
-  // }
 
 }

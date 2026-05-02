@@ -12,7 +12,7 @@ import com.github.vmssilva.calculator.engine.value.NumberValue;
 import com.github.vmssilva.calculator.engine.value.Value;
 import com.github.vmssilva.calculator.engine.value.Values;
 
-public class HelperFunctions {
+public class UtilFunctions {
 
   public static FunctionValue unset() {
     return FunctionFactory.of("unset", (context, args) -> {
