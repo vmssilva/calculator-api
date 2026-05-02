@@ -162,7 +162,7 @@ public final class RecursiveAstParser implements Parser {
             })
             .toList();
 
-        body = factor();
+        body = expression();
 
         Node lambda = new LambdaNode(params, body);
 

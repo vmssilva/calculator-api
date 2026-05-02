@@ -5,15 +5,15 @@ import com.github.vmssilva.calculator.engine.std.ValueType;
 public abstract class BaseFunctionValue implements FunctionValue {
 
   private ValueType[] parameters;
-  private boolean curried;
+  // private boolean curried;
 
-  public BaseFunctionValue(ValueType[] parameters, boolean curried) {
-    this.parameters = parameters;
-    this.curried = curried;
-  }
+  // public BaseFunctionValue(ValueType[] parameters, boolean curried) {
+  // this.parameters = parameters;
+  // this.curried = curried;
+  // }
 
   public BaseFunctionValue(ValueType[] parameters) {
-    this(parameters, false);
+    this.parameters = parameters;
   }
 
   @Override
@@ -21,8 +21,8 @@ public abstract class BaseFunctionValue implements FunctionValue {
     return parameters;
   }
 
-  public boolean isCurried() {
-    return curried;
-  }
+  // public boolean isCurried() {
+  // return curried;
+  // }
 
 }

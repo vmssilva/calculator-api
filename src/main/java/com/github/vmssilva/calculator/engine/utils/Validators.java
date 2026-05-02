@@ -22,8 +22,6 @@ public final class Validators {
       return true;
     }
 
-    // if (args.size() > parameters.size())
-    // return false;
     if (parameters.size() != args.size())
       return false;
 

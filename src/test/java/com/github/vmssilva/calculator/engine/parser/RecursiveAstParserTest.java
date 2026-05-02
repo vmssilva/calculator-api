@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import com.github.vmssilva.calculator.engine.ast.Node;
 import com.github.vmssilva.calculator.engine.context.ApplicationContext;
 import com.github.vmssilva.calculator.engine.exception.CalculatorParserException;
+import com.github.vmssilva.calculator.engine.exception.ValueErrorException;
 import com.github.vmssilva.calculator.engine.lexer.Lexer;
 import com.github.vmssilva.calculator.engine.lexer.SimpleLexer;
 import com.github.vmssilva.calculator.engine.value.Values;
@@ -190,6 +191,7 @@ class RecursiveAstParserTest {
   @DisplayName("Should calculate percentage")
   void testPercentage() {
     assertEquals(expect(1560.0), eval("1200 * (1 + 0.30)"));
+    assertEquals(expect(1560.0), eval("1200 + (30 % 1200)"));
   }
 
   @Test
@@ -383,6 +385,185 @@ class RecursiveAstParserTest {
   @DisplayName("Incomplete parentheses Node")
   void testIncompleteParenthesesNode() {
     assertThrows(CalculatorParserException.class, () -> eval("(2+)"));
+  }
+
+  @Test
+  @DisplayName("Should evaluate predicate functions")
+  void testPredicates() {
+    assertEquals(expect(1.0), eval("isPositive(10)"));
+    assertEquals(expect(0.0), eval("isPositive(-1)"));
+
+    assertEquals(expect(1.0), eval("isNegative(-5)"));
+    assertEquals(expect(0.0), eval("isNegative(5)"));
+
+    assertEquals(expect(1.0), eval("isZero(0)"));
+    assertEquals(expect(0.0), eval("isZero(10)"));
+  }
+
+  @Test
+  @DisplayName("Should evaluate basic operations")
+  void testBasicOperations() {
+    assertEquals(expect(5.0), eval("add(2, 3)"));
+    assertEquals(expect(1.0), eval("subtract(3, 2)"));
+    assertEquals(expect(6.0), eval("multiply(2, 3)"));
+    assertEquals(expect(2.0), eval("divide(6, 3)"));
+
+    assertEquals(expect(300.0), eval("percentage(30, 1000)"));
+  }
+
+  @Test
+  @DisplayName("Should evaluate aggregation functions")
+  void testAggregations() {
+    assertEquals(expect(6.0), eval("sum(1, 2, 3)"));
+    assertEquals(expect(1.0), eval("min(1, 2, 3)"));
+    assertEquals(expect(3.0), eval("max(1, 2, 3)"));
+  }
+
+  @Test
+  @DisplayName("Should evaluate unary math functions")
+  void testUnaryMath() {
+    assertEquals(expect(5.0), eval("abs(-5)"));
+    assertEquals(expect(5.0), eval("truncate(5.9)"));
+    assertEquals(expect(-5.0), eval("negate(5)"));
+  }
+
+  @Test
+  @DisplayName("Should evaluate factorial and remainder")
+  void testFactorialAndRemainder() {
+    assertEquals(expect(120.0), eval("factorial(5)"));
+    assertEquals(expect(1.0), eval("remainder(10, 3)"));
+  }
+
+  @Test
+  @DisplayName("Should evaluate rounding functions")
+  void testRounding() {
+    assertEquals(expect(5.0), eval("round(4.6)"));
+    assertEquals(expect(4.0), eval("floor(4.9)"));
+    assertEquals(expect(5.0), eval("ceil(4.1)"));
+  }
+
+  @Test
+  @DisplayName("Should evaluate advanced math functions")
+  void testAdvancedMath() {
+    assertEquals(expect(4.0), eval("sqrt(16)"));
+    assertEquals(expect(2.0), eval("log10(100)"));
+    assertEquals(expect(3.0), eval("log(8, 2)")); // dependendo da implementação
+
+    assertEquals(expect(8.0), eval("pow(2, 3)"));
+    assertEquals(expect(Math.exp(1)), eval("exp(1)"));
+    assertEquals(expect(Math.log(2)), eval("ln(2)"));
+
+    assertEquals(expect(5.0), eval("hypot(3, 4)"));
+  }
+
+  @Test
+  @DisplayName("Should clamp values")
+  void testClamp() {
+    assertEquals(expect(5.0), eval("clamp(5, 0, 10)"));
+    assertEquals(expect(0.0), eval("clamp(-1, 0, 10)"));
+    assertEquals(expect(10.0), eval("clamp(20, 0, 10)"));
+  }
+
+  @Test
+  @DisplayName("Should evaluate trigonometric functions")
+  void testTrig() {
+    assertEquals(expect(0.0), eval("sin(0)"));
+    assertEquals(expect(1.0), eval("cos(0)"));
+    assertEquals(expect(0.0), eval("tan(0)"));
+    // assertEquals(expect(1.0), eval("cos(0)"), 1e-9);
+  }
+
+  @Test
+  @DisplayName("Should evaluate inverse trigonometric functions")
+  void testInverseTrig() {
+    assertEquals(expect(Math.PI / 2), eval("asin(1)"));
+    assertEquals(expect(0.0), eval("acos(1)"));
+    assertEquals(expect(0.0), eval("atan(0)"));
+  }
+
+  @Test
+  @DisplayName("Should convert degrees and radians")
+  void testDegRad() {
+    assertEquals(expect(180.0), eval("deg(PI)"));
+    assertEquals(expect(Math.PI), eval("rad(180)"));
+  }
+
+  @Test
+  @DisplayName("Should evaluate sign function")
+  void testSign() {
+    assertEquals(expect(1.0), eval("sign(10)"));
+    assertEquals(expect(-1.0), eval("sign(-5)"));
+    assertEquals(expect(0.0), eval("sign(0)"));
+  }
+
+  @Test
+  @DisplayName("Should evaluate simple lambda assignment and call")
+  void testSimpleLambda() {
+    assertEquals(expect(10.0), eval("f = (x) -> x; f(10)"));
+  }
+
+  @Test
+  @DisplayName("Should evaluate lambda with expression body")
+  void testLambdaExpressionBody() {
+    assertEquals(expect(20.0), eval("f = (x) -> x * 2; f(10)"));
+  }
+
+  @Test
+  @DisplayName("Should evaluate lambda with multiple arguments")
+  void testLambdaMultipleArgs() {
+    assertEquals(expect(30.0), eval("f = (a, b) -> a + b; f(10, 20)"));
+  }
+
+  @Test
+  @DisplayName("Should pass function as argument to lambda")
+  void testLambdaAsCallback() {
+    assertEquals(
+        expect(30.0),
+        eval("fn = (cb, a) -> cb(a, 10); fn(add, 20)"));
+  }
+
+  @Test
+  @DisplayName("Should call builtin function inside lambda")
+  void testLambdaWithBuiltin() {
+    assertEquals(
+        expect(8.0),
+        eval("f = (x) -> multiply(x, 2); f(4)"));
+  }
+
+  @Test
+  @DisplayName("Should evaluate immediate lambda execution")
+  void testImmediateLambda() {
+    assertEquals(
+        expect(10.0),
+        eval("((x) -> x + 5)(5)"));
+  }
+
+  @Test
+  @DisplayName("Should evaluate immediate lambda with expression body")
+  void testImmediateLambdaExpression() {
+    assertEquals(
+        expect(14.0),
+        eval("((a, b) -> a * b + 4)(2, 5)"));
+  }
+
+  @Test
+  @DisplayName("Should evaluate lambda inside expression")
+  void testLambdaInsideExpression() {
+    assertEquals(
+        expect(11.0),
+        eval("2 + ((x) -> x * 3)(3)"));
+  }
+
+  @Test
+  @DisplayName("Should fail invalid lambda syntax")
+  void testInvalidLambdaSyntax() {
+    assertThrows(CalculatorParserException.class, () -> eval("f = (x -> x + 1"));
+  }
+
+  @Test
+  @DisplayName("Should fail invalid lambda call")
+  void testInvalidLambdaCall() {
+    assertThrows(ValueErrorException.class, () -> eval("f = (x) -> x; f()"));
   }
 
 }

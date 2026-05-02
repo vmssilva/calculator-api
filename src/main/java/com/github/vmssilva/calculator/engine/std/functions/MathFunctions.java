@@ -33,8 +33,9 @@ public final class MathFunctions {
     return FunctionFactory.of(name, (context, args) -> {
       var l = Values.asNumber(args.get(0));
       var r = Values.asNumber(args.get(1));
+
       return new NumberValue(l.add(r));
-    }, binaryNumericExpression(), true);
+    }, binaryNumericExpression());
   }
 
   public static FunctionValue subtract() {
@@ -169,22 +170,6 @@ public final class MathFunctions {
     }, unaryNumericExpression());
   }
 
-  // Logarithm
-  public static FunctionValue log() {
-    String name = "log";
-
-    return FunctionFactory.of(name, (context, args) -> {
-      var v = Values.asNumber(args.get(0));
-
-      if (v.compareTo(BigDecimal.ZERO) <= 0) {
-        throw new ValueErrorException("log of non-positive number");
-      }
-
-      return new NumberValue(
-          new BigDecimal(Math.log(v.doubleValue())));
-    }, unaryNumericExpression());
-  }
-
   // Absolute value
   public static FunctionValue abs() {
     String name = "abs";
@@ -203,7 +188,7 @@ public final class MathFunctions {
 
       int sign = x.compareTo(BigDecimal.ZERO);
       return new NumberValue(BigDecimal.valueOf(sign));
-    }, new ValueType[] { ValueType.LIST });
+    }, new ValueType[] { ValueType.NUMBER });
   }
 
   public static FunctionValue pow() {
@@ -230,6 +215,32 @@ public final class MathFunctions {
     }, unaryNumericExpression());
   }
 
+  // Logarithm
+  public static FunctionValue log() {
+    String name = "log";
+
+    return FunctionFactory.of(name, (context, args) -> {
+      if (args.size() != 2) {
+        throw new ValueErrorException("log(x, base) expects exactly 2 arguments");
+      }
+
+      var x = Values.asNumber(args.get(0));
+      var base = Values.asNumber(args.get(1));
+
+      if (x.compareTo(BigDecimal.ZERO) <= 0) {
+        throw new ValueErrorException("log(x, base): x must be > 0");
+      }
+
+      if (base.compareTo(BigDecimal.ZERO) <= 0 || base.compareTo(BigDecimal.ONE) == 0) {
+        throw new ValueErrorException("log(x, base): base must be > 0 and != 1");
+      }
+
+      double result = Math.log(x.doubleValue()) / Math.log(base.doubleValue());
+
+      return new NumberValue(BigDecimal.valueOf(result));
+    }, new ValueType[] { ValueType.LIST }); // varargs controlado manualmente
+  }
+
   public static FunctionValue ln() {
     String name = "ln";
 
@@ -237,7 +248,7 @@ public final class MathFunctions {
       var x = Values.asNumber(args.get(0));
 
       if (x.compareTo(BigDecimal.ZERO) <= 0) {
-        throw new ValueErrorException("ln of non-positive number");
+        throw new ValueErrorException("ln(x): x must be > 0");
       }
 
       return new NumberValue(
@@ -252,12 +263,13 @@ public final class MathFunctions {
       var x = Values.asNumber(args.get(0));
 
       if (x.compareTo(BigDecimal.ZERO) <= 0) {
-        throw new ValueErrorException("log10 of non-positive number");
+        throw new ValueErrorException("log10(x): x must be > 0");
       }
 
       return new NumberValue(
           BigDecimal.valueOf(Math.log10(x.doubleValue())));
     }, unaryNumericExpression());
+
   }
 
   // =========================
@@ -275,7 +287,7 @@ public final class MathFunctions {
           BigDecimal.valueOf(Math.hypot(
               x.doubleValue(),
               y.doubleValue())));
-    }, unaryNumericExpression());
+    }, binaryNumericExpression());
   }
 
   public static FunctionValue clamp() {
@@ -291,7 +303,7 @@ public final class MathFunctions {
       if (value.compareTo(max) > 0)
         return new NumberValue(max);
       return new NumberValue(value);
-    }, unaryNumericExpression());
+    }, new ValueType[] { ValueType.NUMBER, ValueType.NUMBER, ValueType.NUMBER });
   }
 
   // =========================

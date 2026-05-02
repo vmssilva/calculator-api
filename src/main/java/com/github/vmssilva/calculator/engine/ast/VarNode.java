@@ -8,6 +8,7 @@ public record VarNode(String name, Node node) implements Node {
   @Override
   public Value interpret(ApplicationContext context) {
     var value = node.interpret(context);
+
     context.set(name, value);
     return Values.of(0);
   }

@@ -21,8 +21,8 @@ public enum BuiltinFunction {
   PERCENTAGE("percentage", "Calculate percentage of a number", MathFunctions::percentage),
 
   // Extras
-  ENV("env", "Displays enrironment", HelperFunctions::env),
-  UNSET("unset", "Remove identifier of current scope", HelperFunctions::unset),
+  ENV("env", "Displays enrironment", UtilFunctions::env),
+  UNSET("unset", "Remove identifier of current scope", UtilFunctions::unset),
   SUM("sum", "Sum all numbers", MathFunctions::sum),
   MIN("min", "Minimum value", MathFunctions::min),
   MAX("max", "Maximum value", MathFunctions::max),
@@ -53,7 +53,7 @@ public enum BuiltinFunction {
   COS("cos", "Cosine", MathFunctions::cos),
   TAN("tan", "Tangent", MathFunctions::tan),
   DEG("deg", "Radians to degrees", MathFunctions::deg),
-  RAD("rad", "Degress to radians", MathFunctions::rad),
+  RAD("rad", "Degrees to radians", MathFunctions::rad),
   SIGN("sign", "Sign of number (-1, 0, 1)", MathFunctions::sign);
 
   private final String name;
