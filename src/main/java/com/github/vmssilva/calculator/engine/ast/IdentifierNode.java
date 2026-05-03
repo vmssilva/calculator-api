@@ -1,7 +1,7 @@
 package com.github.vmssilva.calculator.engine.ast;
 
 import com.github.vmssilva.calculator.engine.context.ApplicationContext;
-import com.github.vmssilva.calculator.engine.exception.CalculatorRuntimeException;
+import com.github.vmssilva.calculator.engine.exception.ExecutionErrorException;
 import com.github.vmssilva.calculator.engine.value.Value;
 
 public record IdentifierNode(String name) implements Node {
@@ -11,7 +11,7 @@ public record IdentifierNode(String name) implements Node {
     Value value = context.get(name);
 
     if (value == null)
-      throw new CalculatorRuntimeException(name + " is not defined");
+      throw new ExecutionErrorException(name + " is not defined");
 
     return value;
   }

@@ -3,7 +3,7 @@ package com.github.vmssilva.calculator.engine.ast;
 import java.util.List;
 
 import com.github.vmssilva.calculator.engine.context.ApplicationContext;
-import com.github.vmssilva.calculator.engine.exception.CalculatorRuntimeException;
+import com.github.vmssilva.calculator.engine.exception.ExecutionErrorException;
 import com.github.vmssilva.calculator.engine.value.FunctionValue;
 import com.github.vmssilva.calculator.engine.value.Value;
 
@@ -15,7 +15,7 @@ public record FunctionCallNode(Node target, List<Node> args) implements Node {
     Value value = target.interpret(context);
 
     if (!(value instanceof FunctionValue fn)) {
-      throw new CalculatorRuntimeException("Target is not a function");
+      throw new ExecutionErrorException("Target is not a function");
     }
 
     var evaluated = args.stream()

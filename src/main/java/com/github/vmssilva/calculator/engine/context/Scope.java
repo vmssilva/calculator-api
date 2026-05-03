@@ -4,7 +4,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.github.vmssilva.calculator.engine.exception.CalculatorRuntimeException;
+import com.github.vmssilva.calculator.engine.exception.ExecutionErrorException;
 import com.github.vmssilva.calculator.engine.value.Value;
 
 public class Scope {
@@ -32,8 +32,7 @@ public class Scope {
       return parent.get(name);
     }
 
-    throw new CalculatorRuntimeException(
-        "Execution error: '" + name + "' is not defined");
+    throw new ExecutionErrorException("Invalid indentifier: '" + name + "' is not defined");
   }
 
   // Existence check (lexical)

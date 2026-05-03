@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.github.vmssilva.calculator.engine.exception.ValueErrorException;
+import com.github.vmssilva.calculator.engine.exception.ExecutionErrorException;
 import com.github.vmssilva.calculator.engine.std.ValueType;
 import com.github.vmssilva.calculator.engine.value.FunctionValue;
 import com.github.vmssilva.calculator.engine.value.Value;
@@ -41,7 +41,7 @@ public final class Validators {
   public static void validate(FunctionValue fn, List<Value> args) {
 
     if (args == null) {
-      throw new ValueErrorException("Arguments cannot be null");
+      throw new ExecutionErrorException("Arguments cannot be null");
     }
 
     var isAssignable = isAssignable(fn, args);
@@ -66,7 +66,7 @@ public final class Validators {
         expect = fn.name() + "(...Any)";
       }
 
-      throw new ValueErrorException("expects: " + expect + ", got: " + actual);
+      throw new ExecutionErrorException("expects: " + expect + ", got: " + actual);
     }
   }
 

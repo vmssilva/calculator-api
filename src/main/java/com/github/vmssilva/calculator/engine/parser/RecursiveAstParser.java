@@ -296,7 +296,7 @@ public final class RecursiveAstParser implements Parser {
 
   private void syntaxError(int line, int col) {
 
-    StringBuilder message = new StringBuilder("Syntax error: invalid syntax");
+    StringBuilder message = new StringBuilder("Invalid syntax");
 
     if (!tokens.isEmpty()) {
       StringBuilder sb = new StringBuilder(
