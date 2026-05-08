@@ -6,38 +6,41 @@ import com.github.vmssilva.calculator.engine.exception.CalculatorRuntimeExceptio
 
 public final class Values {
 
-  public static <T> NumberValue of(T num) {
+  public static <T> Value of(T type) {
 
-    if (num instanceof BigDecimal n)
-      return new NumberValue(n);
+    if (type instanceof BigDecimal value)
+      return new NumberValue(value);
 
-    if (num instanceof Short n)
-      return new NumberValue(new BigDecimal(n));
+    if (type instanceof Short value)
+      return new NumberValue(new BigDecimal(value));
 
-    if (num instanceof Integer n)
-      return new NumberValue(new BigDecimal(n));
+    if (type instanceof Integer value)
+      return new NumberValue(new BigDecimal(value));
 
-    if (num instanceof Float n)
-      return new NumberValue(new BigDecimal(n));
+    if (type instanceof Float value)
+      return new NumberValue(new BigDecimal(value));
 
-    if (num instanceof Double n)
-      return new NumberValue(new BigDecimal(n));
+    if (type instanceof Double value)
+      return new NumberValue(new BigDecimal(value));
 
-    if (num instanceof Long n)
-      return new NumberValue(new BigDecimal(n));
+    if (type instanceof Long value)
+      return new NumberValue(new BigDecimal(value));
 
-    throw new CalculatorRuntimeException("Invalid number format");
+    if (type instanceof String value)
+      return new StringValue(value);
+
+    throw new CalculatorRuntimeException("Invalid format");
   }
 
   public static BigDecimal asNumber(Value v) {
     if (v instanceof NumberValue n)
-      return new BigDecimal(formatNumber(n.value()));
+      return new BigDecimal(formatNumber(n.unwrap()));
     throw new RuntimeException("Expected number but got " + v.getClass());
   }
 
   public static String asString(Value v) {
     if (v instanceof StringValue s)
-      return s.value();
+      return s.unwrap();
     throw new RuntimeException("Expected String but got " + v.getClass());
   }
 
