@@ -47,8 +47,6 @@ public class UtilFunctions {
         throw new ValueErrorException("env() takes no arguments");
       }
 
-      lines.add(Values.of("Environment:"));
-
       Scope scope = context.currentScope();
       Map<String, Value> seen = new LinkedHashMap<>();
 
@@ -69,10 +67,8 @@ public class UtilFunctions {
             var value = entry.getValue();
 
             if (value instanceof FunctionValue fn) {
-              // System.out.println("fn " + name + " -> " + fn);
               lines.add(Values.of("fn " + name + " -> " + fn));
             } else {
-              // System.out.println("var " + name + " = " + value);
               lines.add(Values.of("var " + name + " = " + value));
             }
           });
