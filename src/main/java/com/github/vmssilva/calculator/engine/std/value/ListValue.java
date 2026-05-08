@@ -15,4 +15,10 @@ public record ListValue(List<Value> values) implements Value<List<Value>> {
   public List<Value> unwrap() {
     return values;
   }
+
+  @Override
+  public final String toString() {
+    return "";
+  }
+
 }
