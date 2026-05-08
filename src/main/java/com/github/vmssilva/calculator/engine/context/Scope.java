@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.github.vmssilva.calculator.engine.exception.ExecutionErrorException;
-import com.github.vmssilva.calculator.engine.value.Value;
+import com.github.vmssilva.calculator.engine.std.value.Value;
 
 public class Scope {
 

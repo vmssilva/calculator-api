@@ -1,4 +1,4 @@
-package com.github.vmssilva.calculator.engine.value;
+package com.github.vmssilva.calculator.engine.std.value;
 
 import java.math.BigDecimal;
 

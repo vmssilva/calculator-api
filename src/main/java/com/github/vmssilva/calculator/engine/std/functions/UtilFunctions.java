@@ -6,11 +6,11 @@ import java.util.Map;
 
 import com.github.vmssilva.calculator.engine.context.Scope;
 import com.github.vmssilva.calculator.engine.exception.ValueErrorException;
-import com.github.vmssilva.calculator.engine.std.ValueType;
-import com.github.vmssilva.calculator.engine.value.FunctionValue;
-import com.github.vmssilva.calculator.engine.value.NumberValue;
-import com.github.vmssilva.calculator.engine.value.Value;
-import com.github.vmssilva.calculator.engine.value.Values;
+import com.github.vmssilva.calculator.engine.std.type.ValueType;
+import com.github.vmssilva.calculator.engine.std.value.FunctionValue;
+import com.github.vmssilva.calculator.engine.std.value.NumberValue;
+import com.github.vmssilva.calculator.engine.std.value.Value;
+import com.github.vmssilva.calculator.engine.std.value.Values;
 
 public class UtilFunctions {
 

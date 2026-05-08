@@ -16,7 +16,7 @@ import com.github.vmssilva.calculator.engine.exception.CalculatorParserException
 import com.github.vmssilva.calculator.engine.exception.ExecutionErrorException;
 import com.github.vmssilva.calculator.engine.lexer.Lexer;
 import com.github.vmssilva.calculator.engine.lexer.SimpleLexer;
-import com.github.vmssilva.calculator.engine.value.Values;
+import com.github.vmssilva.calculator.engine.std.value.Values;
 
 class RecursiveAstParserTest {
 

@@ -1,9 +1,9 @@
-package com.github.vmssilva.calculator.engine.value;
+package com.github.vmssilva.calculator.engine.std.value;
 
 import java.util.List;
 
 import com.github.vmssilva.calculator.engine.context.ApplicationContext;
-import com.github.vmssilva.calculator.engine.std.ValueType;
+import com.github.vmssilva.calculator.engine.std.type.ValueType;
 
 public interface FunctionValue extends Value {
   Value apply(ApplicationContext context, List<Value> args);
@@ -18,4 +18,5 @@ public interface FunctionValue extends Value {
   default ValueType type() {
     return ValueType.FUNCTION;
   }
+
 }

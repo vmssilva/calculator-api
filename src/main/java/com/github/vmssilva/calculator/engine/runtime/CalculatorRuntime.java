@@ -10,9 +10,9 @@ import com.github.vmssilva.calculator.engine.exception.CalculatorParserException
 import com.github.vmssilva.calculator.engine.exception.ExecutionErrorException;
 import com.github.vmssilva.calculator.engine.exception.ValueErrorException;
 import com.github.vmssilva.calculator.engine.parser.RecursiveAstParser;
-import com.github.vmssilva.calculator.engine.value.NumberValue;
-import com.github.vmssilva.calculator.engine.value.Value;
-import com.github.vmssilva.calculator.engine.value.Values;
+import com.github.vmssilva.calculator.engine.std.value.NumberValue;
+import com.github.vmssilva.calculator.engine.std.value.Value;
+import com.github.vmssilva.calculator.engine.std.value.Values;
 
 public class CalculatorRuntime {
 

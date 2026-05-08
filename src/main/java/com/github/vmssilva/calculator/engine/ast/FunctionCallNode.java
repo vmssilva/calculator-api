@@ -4,8 +4,8 @@ import java.util.List;
 
 import com.github.vmssilva.calculator.engine.context.ApplicationContext;
 import com.github.vmssilva.calculator.engine.exception.ExecutionErrorException;
-import com.github.vmssilva.calculator.engine.value.FunctionValue;
-import com.github.vmssilva.calculator.engine.value.Value;
+import com.github.vmssilva.calculator.engine.std.value.FunctionValue;
+import com.github.vmssilva.calculator.engine.std.value.Value;
 
 public record FunctionCallNode(Node target, List<Node> args) implements Node {
 

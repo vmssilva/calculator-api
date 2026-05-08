@@ -1,8 +1,8 @@
 package com.github.vmssilva.calculator.engine.ast;
 
 import com.github.vmssilva.calculator.engine.context.ApplicationContext;
-import com.github.vmssilva.calculator.engine.value.Value;
-import com.github.vmssilva.calculator.engine.value.Values;
+import com.github.vmssilva.calculator.engine.std.value.Value;
+import com.github.vmssilva.calculator.engine.std.value.Values;
 
 public record VarNode(String name, Node node) implements Node {
   @Override

@@ -1,6 +1,6 @@
-package com.github.vmssilva.calculator.engine.value;
+package com.github.vmssilva.calculator.engine.std.value;
 
-import com.github.vmssilva.calculator.engine.std.ValueType;
+import com.github.vmssilva.calculator.engine.std.type.ValueType;
 
 public record StringValue(String value) implements Value {
 

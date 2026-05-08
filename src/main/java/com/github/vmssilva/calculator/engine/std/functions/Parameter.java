@@ -1,6 +1,6 @@
 package com.github.vmssilva.calculator.engine.std.functions;
 
-import com.github.vmssilva.calculator.engine.std.ValueType;
+import com.github.vmssilva.calculator.engine.std.type.ValueType;
 
 public record Parameter(
     String name,
