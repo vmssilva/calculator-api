@@ -18,7 +18,6 @@ public class BuiltinFunction implements FunctionValue, Callable {
   public BuiltinFunction(FunctionValue delegate, ApplicationContext context) {
     this.delegate = delegate;
     this.context = context;
-
   }
 
   @Override
@@ -44,6 +43,11 @@ public class BuiltinFunction implements FunctionValue, Callable {
   @Override
   public String name() {
     return delegate.name();
+  }
+
+  @Override
+  public FunctionValue unwrap() {
+    return delegate;
   }
 
 }

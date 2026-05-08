@@ -5,6 +5,7 @@ import java.util.List;
 import com.github.vmssilva.calculator.engine.ast.expressions.NumberExpression;
 import com.github.vmssilva.calculator.engine.context.ApplicationContext;
 import com.github.vmssilva.calculator.engine.context.Scope;
+import com.github.vmssilva.calculator.engine.exception.ReturnValueException;
 import com.github.vmssilva.calculator.engine.utils.Validators;
 import com.github.vmssilva.calculator.engine.std.type.ValueType;
 import com.github.vmssilva.calculator.engine.std.value.FunctionValue;
@@ -38,7 +39,11 @@ public record LambdaNode(List<String> params, Node body) implements Node {
             local.set(paramNames.get(i), args.get(i));
           }
 
-          return body.interpret(local);
+          try {
+            return body.interpret(local);
+          } catch (ReturnValueException e) {
+            return e.getValue();
+          }
 
         } finally {
           local.popScope();

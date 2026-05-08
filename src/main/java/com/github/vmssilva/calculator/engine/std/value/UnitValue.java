@@ -2,7 +2,7 @@ package com.github.vmssilva.calculator.engine.std.value;
 
 import com.github.vmssilva.calculator.engine.std.type.ValueType;
 
-public final class UnitValue implements Value {
+public final class UnitValue implements Value<String> {
 
   public static final UnitValue INSTANCE = new UnitValue();
 
@@ -17,6 +17,11 @@ public final class UnitValue implements Value {
   @Override
   public ValueType type() {
     return ValueType.UNIT;
+  }
+
+  @Override
+  public String unwrap() {
+    return "";
   }
 
 }

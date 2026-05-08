@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 
 import com.github.vmssilva.calculator.engine.std.type.ValueType;
 
-public record NumberValue(BigDecimal value) implements Value {
+public record NumberValue(BigDecimal value) implements Value<BigDecimal> {
 
   @Override
   public final String toString() {
@@ -16,4 +16,8 @@ public record NumberValue(BigDecimal value) implements Value {
     return ValueType.NUMBER;
   }
 
+  @Override
+  public BigDecimal unwrap() {
+    return value;
+  }
 }
