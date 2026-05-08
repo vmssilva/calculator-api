@@ -15,5 +15,6 @@ public enum TokenType {
   LPAREN,
   RPAREN,
   ARROW,
+  STRING,
   EXCLAMATION,
 }
