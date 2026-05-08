@@ -5,10 +5,11 @@ import java.util.List;
 import com.github.vmssilva.calculator.engine.ast.expressions.NumberExpression;
 import com.github.vmssilva.calculator.engine.context.ApplicationContext;
 import com.github.vmssilva.calculator.engine.context.Scope;
-import com.github.vmssilva.calculator.engine.std.ValueType;
+import com.github.vmssilva.calculator.engine.exception.ReturnValueException;
 import com.github.vmssilva.calculator.engine.utils.Validators;
-import com.github.vmssilva.calculator.engine.value.BaseFunctionValue;
-import com.github.vmssilva.calculator.engine.value.Value;
+import com.github.vmssilva.calculator.engine.std.type.ValueType;
+import com.github.vmssilva.calculator.engine.std.value.FunctionValue;
+import com.github.vmssilva.calculator.engine.std.value.Value;
 
 public record LambdaNode(List<String> params, Node body) implements Node {
 
@@ -17,7 +18,7 @@ public record LambdaNode(List<String> params, Node body) implements Node {
 
     Scope closureScope = context.currentScope();
 
-    return new BaseFunctionValue(buildParamTypes(params)) {
+    return new FunctionValue() {
 
       private final Scope closure = closureScope;
 
@@ -38,7 +39,11 @@ public record LambdaNode(List<String> params, Node body) implements Node {
             local.set(paramNames.get(i), args.get(i));
           }
 
-          return body.interpret(local);
+          try {
+            return body.interpret(local);
+          } catch (ReturnValueException e) {
+            return e.getValue();
+          }
 
         } finally {
           local.popScope();
@@ -122,6 +127,11 @@ public record LambdaNode(List<String> params, Node body) implements Node {
         }
 
         return node.toString();
+      }
+
+      @Override
+      public ValueType[] parameters() {
+        return buildParamTypes(params);
       }
 
     };

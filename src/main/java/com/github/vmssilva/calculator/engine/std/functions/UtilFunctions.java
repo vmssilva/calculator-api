@@ -1,16 +1,19 @@
 package com.github.vmssilva.calculator.engine.std.functions;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.github.vmssilva.calculator.engine.context.Scope;
 import com.github.vmssilva.calculator.engine.exception.ValueErrorException;
-import com.github.vmssilva.calculator.engine.std.ValueType;
-import com.github.vmssilva.calculator.engine.value.FunctionValue;
-import com.github.vmssilva.calculator.engine.value.NumberValue;
-import com.github.vmssilva.calculator.engine.value.Value;
-import com.github.vmssilva.calculator.engine.value.Values;
+import com.github.vmssilva.calculator.engine.std.type.ValueType;
+import com.github.vmssilva.calculator.engine.std.value.FunctionValue;
+import com.github.vmssilva.calculator.engine.std.value.ListValue;
+import com.github.vmssilva.calculator.engine.std.value.NumberValue;
+import com.github.vmssilva.calculator.engine.std.value.Value;
+import com.github.vmssilva.calculator.engine.std.value.Values;
 
 public class UtilFunctions {
 
@@ -38,11 +41,13 @@ public class UtilFunctions {
   public static FunctionValue env() {
     return FunctionFactory.of("env", (context, args) -> {
 
+      List<Value> lines = new ArrayList<>();
+
       if (!args.isEmpty()) {
         throw new ValueErrorException("env() takes no arguments");
       }
 
-      System.out.println("Environment:");
+      lines.add(Values.of("Environment:"));
 
       Scope scope = context.currentScope();
       Map<String, Value> seen = new LinkedHashMap<>();
@@ -64,13 +69,16 @@ public class UtilFunctions {
             var value = entry.getValue();
 
             if (value instanceof FunctionValue fn) {
-              System.out.println("fn " + name + " -> " + fn);
+              // System.out.println("fn " + name + " -> " + fn);
+              lines.add(Values.of("fn " + name + " -> " + fn));
             } else {
-              System.out.println("var " + name + " = " + value);
+              // System.out.println("var " + name + " = " + value);
+              lines.add(Values.of("var " + name + " = " + value));
             }
           });
 
-      return new NumberValue(BigDecimal.ZERO);
+      // return new NumberValue(BigDecimal.ZERO);
+      return new ListValue(lines);
 
     }, new ValueType[] {});
   }

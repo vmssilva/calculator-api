@@ -2,10 +2,10 @@ package com.github.vmssilva.calculator.engine.std.functions;
 
 import java.math.BigDecimal;
 
-import com.github.vmssilva.calculator.engine.std.ValueType;
-import com.github.vmssilva.calculator.engine.value.FunctionValue;
-import com.github.vmssilva.calculator.engine.value.NumberValue;
-import com.github.vmssilva.calculator.engine.value.Values;
+import com.github.vmssilva.calculator.engine.std.type.ValueType;
+import com.github.vmssilva.calculator.engine.std.value.FunctionValue;
+import com.github.vmssilva.calculator.engine.std.value.NumberValue;
+import com.github.vmssilva.calculator.engine.std.value.Values;
 
 public final class PredicateFunctions {
 

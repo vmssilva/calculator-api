@@ -5,11 +5,11 @@ import java.math.BigInteger;
 import java.math.RoundingMode;
 
 import com.github.vmssilva.calculator.engine.exception.ValueErrorException;
-import com.github.vmssilva.calculator.engine.value.FunctionValue;
-import com.github.vmssilva.calculator.engine.value.NumberValue;
-import com.github.vmssilva.calculator.engine.value.Value;
-import com.github.vmssilva.calculator.engine.value.Values;
-import com.github.vmssilva.calculator.engine.std.ValueType;
+import com.github.vmssilva.calculator.engine.std.value.FunctionValue;
+import com.github.vmssilva.calculator.engine.std.value.NumberValue;
+import com.github.vmssilva.calculator.engine.std.value.Value;
+import com.github.vmssilva.calculator.engine.std.value.Values;
+import com.github.vmssilva.calculator.engine.std.type.ValueType;
 
 public final class MathFunctions {
 

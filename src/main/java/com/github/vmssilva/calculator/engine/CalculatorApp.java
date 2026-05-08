@@ -1,7 +1,6 @@
 package com.github.vmssilva.calculator.engine;
 
 import com.github.vmssilva.calculator.engine.context.ApplicationContext;
-import com.github.vmssilva.calculator.engine.exception.CalculatorException;
 import com.github.vmssilva.calculator.engine.runtime.CalculatorRuntime;
 
 public class CalculatorApp {
@@ -19,7 +18,7 @@ public class CalculatorApp {
     try {
       var result = runtime.evaluate(expression, ctx);
       System.out.println(result);
-    } catch (CalculatorException e) {
+    } catch (RuntimeException e) {
       System.out.println(e.getMessage());
     }
   }

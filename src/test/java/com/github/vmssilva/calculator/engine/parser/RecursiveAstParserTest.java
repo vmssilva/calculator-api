@@ -13,10 +13,10 @@ import org.junit.jupiter.api.Test;
 import com.github.vmssilva.calculator.engine.ast.Node;
 import com.github.vmssilva.calculator.engine.context.ApplicationContext;
 import com.github.vmssilva.calculator.engine.exception.CalculatorParserException;
-import com.github.vmssilva.calculator.engine.exception.ValueErrorException;
+import com.github.vmssilva.calculator.engine.exception.ExecutionErrorException;
 import com.github.vmssilva.calculator.engine.lexer.Lexer;
 import com.github.vmssilva.calculator.engine.lexer.SimpleLexer;
-import com.github.vmssilva.calculator.engine.value.Values;
+import com.github.vmssilva.calculator.engine.std.value.Values;
 
 class RecursiveAstParserTest {
 
@@ -563,7 +563,7 @@ class RecursiveAstParserTest {
   @Test
   @DisplayName("Should fail invalid lambda call")
   void testInvalidLambdaCall() {
-    assertThrows(ValueErrorException.class, () -> eval("f = (x) -> x; f()"));
+    assertThrows(ExecutionErrorException.class, () -> eval("f = (x) -> x; f()"));
   }
 
 }

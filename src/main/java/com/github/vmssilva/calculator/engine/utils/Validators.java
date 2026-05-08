@@ -4,10 +4,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.github.vmssilva.calculator.engine.exception.ValueErrorException;
-import com.github.vmssilva.calculator.engine.std.ValueType;
-import com.github.vmssilva.calculator.engine.value.FunctionValue;
-import com.github.vmssilva.calculator.engine.value.Value;
+import com.github.vmssilva.calculator.engine.exception.ExecutionErrorException;
+import com.github.vmssilva.calculator.engine.std.type.ValueType;
+import com.github.vmssilva.calculator.engine.std.value.FunctionValue;
+import com.github.vmssilva.calculator.engine.std.value.Value;
 
 public final class Validators {
 
@@ -38,35 +38,35 @@ public final class Validators {
     return true;
   }
 
-  public static void validate(FunctionValue fn, List<Value> args) {
+  public static void validate(FunctionValue functionValue, List<Value> args) {
 
     if (args == null) {
-      throw new ValueErrorException("Arguments cannot be null");
+      throw new ExecutionErrorException("Arguments cannot be null");
     }
 
-    var isAssignable = isAssignable(fn, args);
+    var isAssignable = isAssignable(functionValue, args);
 
     if (!isAssignable) {
 
-      var parameters = Arrays.asList(fn.parameters());
+      var parameters = Arrays.asList(functionValue.parameters());
 
-      var expect = fn.name() + "(" +
+      var expect = functionValue.name() + "(" +
           parameters.stream()
               .map(p -> p.value())
               .collect(Collectors.joining(", "))
           + ")";
 
-      var actual = fn.name() + "(" +
+      var actual = functionValue.name() + "(" +
           args.stream()
               .map(p -> p.type().value())
               .collect(Collectors.joining(", "))
           + ")";
 
       if (!parameters.isEmpty() && parameters.get(0) == ValueType.LIST) {
-        expect = fn.name() + "(...Any)";
+        expect = functionValue.name() + "(...Any)";
       }
 
-      throw new ValueErrorException("expects: " + expect + ", got: " + actual);
+      throw new ExecutionErrorException("expects: " + expect + ", got: " + actual);
     }
   }
 

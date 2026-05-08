@@ -3,18 +3,17 @@ package com.github.vmssilva.calculator.engine.std.functions;
 import java.util.List;
 
 import com.github.vmssilva.calculator.engine.context.ApplicationContext;
-import com.github.vmssilva.calculator.engine.std.ValueType;
-import com.github.vmssilva.calculator.engine.value.BaseFunctionValue;
-import com.github.vmssilva.calculator.engine.value.FunctionValue;
-import com.github.vmssilva.calculator.engine.value.Value;
+import com.github.vmssilva.calculator.engine.std.type.ValueType;
+import com.github.vmssilva.calculator.engine.std.value.FunctionValue;
+import com.github.vmssilva.calculator.engine.std.value.Value;
 
 public final class FunctionFactory {
 
   private FunctionFactory() {
   }
 
-  public static FunctionValue of(String name, Function<List<Value>, Value> impl, ValueType[] parameters) {
-    return new BaseFunctionValue(parameters) {
+  public static FunctionValue of(String name, Callable impl, ValueType[] parameters) {
+    return new FunctionValue() {
 
       @Override
       public Value apply(ApplicationContext context, List<Value> args) {
@@ -24,6 +23,11 @@ public final class FunctionFactory {
       @Override
       public String name() {
         return name;
+      }
+
+      @Override
+      public ValueType[] parameters() {
+        return parameters;
       }
     };
   }

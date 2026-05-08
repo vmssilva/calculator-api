@@ -75,8 +75,9 @@ public final class RecursiveAstParser implements Parser {
 
       String operator = advance().value();
 
-      if (isOperator())
+      if (isOperator() && peek().type() != TokenType.MINUS) {
         syntaxError(0, pos);
+      }
 
       Node right = term();
       expr = new BinaryExpression(expr, right, operator);
@@ -126,6 +127,11 @@ public final class RecursiveAstParser implements Parser {
     // 1. unary
     if (match(TokenType.PLUS, TokenType.MINUS)) {
       String op = advance().value();
+
+      if (isOperator()) {
+        syntaxError(line, pos);
+      }
+
       return new UnaryExpression(op, factor());
     }
 
@@ -296,7 +302,7 @@ public final class RecursiveAstParser implements Parser {
 
   private void syntaxError(int line, int col) {
 
-    StringBuilder message = new StringBuilder("Syntax error: invalid syntax");
+    StringBuilder message = new StringBuilder("Invalid syntax");
 
     if (!tokens.isEmpty()) {
       StringBuilder sb = new StringBuilder(

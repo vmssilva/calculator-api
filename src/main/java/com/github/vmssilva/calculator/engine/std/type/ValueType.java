@@ -1,11 +1,12 @@
-package com.github.vmssilva.calculator.engine.std;
+package com.github.vmssilva.calculator.engine.std.type;
 
 public enum ValueType {
   NUMBER("Number"),
   FUNCTION("Function"),
   ANY("Any"),
   STRING("String"),
-  LIST("List");
+  LIST("List"),
+  UNIT("Unit");
 
   private String value;
 

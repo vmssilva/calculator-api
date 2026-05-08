@@ -1,9 +1,9 @@
 package com.github.vmssilva.calculator.engine.context;
 
 import com.github.vmssilva.calculator.engine.std.constants.Constants;
-import com.github.vmssilva.calculator.engine.std.functions.BuiltinFunction;
-import com.github.vmssilva.calculator.engine.value.FunctionValue;
-import com.github.vmssilva.calculator.engine.value.Value;
+import com.github.vmssilva.calculator.engine.std.functions.Functions;
+import com.github.vmssilva.calculator.engine.std.value.FunctionValue;
+import com.github.vmssilva.calculator.engine.std.value.Value;
 
 public class ApplicationContext {
 
@@ -71,7 +71,7 @@ public class ApplicationContext {
       builtins.set(constant.key(), constant.value());
     }
 
-    for (BuiltinFunction fn : BuiltinFunction.values()) {
+    for (Functions fn : Functions.values()) {
       builtins.set(fn.key(), fn.create(this));
     }
   }
