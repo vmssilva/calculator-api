@@ -73,7 +73,6 @@ public class UtilFunctions {
             }
           });
 
-      // return new NumberValue(BigDecimal.ZERO);
       return new ListValue(lines);
 
     }, new ValueType[] {});
