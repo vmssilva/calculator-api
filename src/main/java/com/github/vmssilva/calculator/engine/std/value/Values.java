@@ -50,7 +50,7 @@ public final class Values {
 
     int digits = value.precision();
 
-    // limite de segurança visual
+    // limite de seguranca visual
     int MAX_DIGITS = 100;
 
     if (digits > MAX_DIGITS) {
