@@ -28,17 +28,17 @@ public final class FunctionFactory {
       }
 
       @Override
-      public ValueType[] parameters() {
-        return parameters;
-      }
-
-      @Override
       public String toString() {
         return name() + "(" +
-            Arrays.asList(parameters()).stream()
+            Arrays.stream(parameters())
                 .map(p -> p.value())
                 .collect(Collectors.joining(", "))
             + ")";
+      }
+
+      @Override
+      public ValueType[] parameters() {
+        return parameters;
       }
 
     };

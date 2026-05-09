@@ -118,6 +118,11 @@ public final class SimpleLexer implements Lexer {
       return;
     }
 
+    if (c == '"') {
+      handleString();
+      return;
+    }
+
     if (isDigit(c)) {
       handleDigit();
       return;
@@ -130,6 +135,91 @@ public final class SimpleLexer implements Lexer {
 
     invalidCharacterFound(c, line, current);
 
+  }
+
+  private void handleString() {
+    advance();
+
+    StringBuilder value = new StringBuilder();
+
+    while (!isAtEnd() && peek() != '"') {
+
+      if (peek() == '\\') {
+        value.append(readEscape());
+      } else {
+        value.append(advance());
+      }
+
+    }
+
+    if (isAtEnd())
+      throw new CalculatorLexerException("Unbalanced string", line, current);
+
+    advance();
+
+    addToken(TokenType.STRING, value.toString());
+  }
+
+  private String readEscape() {
+
+    // We are called right after detecting '\'
+    advance(); // consume '\'
+
+    if (isAtEnd()) {
+      throw new CalculatorLexerException(
+          "Unexpected EOF after escape character",
+          line,
+          current);
+    }
+
+    char escapedChar = advance(); // consume escaped character
+
+    return switch (escapedChar) {
+
+      case '\\' -> "\\";
+      case '"' -> "\"";
+      case 't' -> "\t";
+      case 'f' -> "\f";
+      case 'b' -> "\b";
+      case 'n' -> "\n";
+      case '0' -> "\0";
+
+      case 'u' -> {
+
+        // At this point we are positioned at the first hex digit
+        int hexStart = current;
+        int hexEnd = current + 4;
+
+        if (hexEnd > expression.length()) {
+          throw new CalculatorLexerException(
+              "Invalid unicode escape: unexpected EOF",
+              line,
+              current);
+        }
+
+        String hex = expression.substring(hexStart, hexEnd);
+
+        int codePoint;
+        try {
+          codePoint = Integer.parseInt(hex, 16);
+        } catch (NumberFormatException e) {
+          throw new CalculatorLexerException(
+              "Invalid unicode escape: \\u" + hex,
+              line,
+              current);
+        }
+
+        // Consume the 4 hex digits explicitly
+        current += 4;
+
+        yield String.valueOf((char) codePoint);
+      }
+
+      default -> throw new CalculatorLexerException(
+          "Invalid escape sequence: \\" + escapedChar,
+          line,
+          current);
+    };
   }
 
   private void handleDigit() {
@@ -209,4 +299,5 @@ public final class SimpleLexer implements Lexer {
             c, line, col),
         line, col);
   }
+
 }

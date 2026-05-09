@@ -20,9 +20,9 @@ public class UtilFunctions {
   public static FunctionValue unset() {
     return FunctionFactory.of("unset", (context, args) -> {
 
-      if (args.get(0).type() != ValueType.STRING) {
-        throw new ValueErrorException("unset expect String argument");
-      }
+      // if (args.get(0).type() != ValueType.STRING) {
+      // throw new ValueErrorException("unset expect String argument");
+      // }
 
       var name = Values.asString(args.get(0));
 
