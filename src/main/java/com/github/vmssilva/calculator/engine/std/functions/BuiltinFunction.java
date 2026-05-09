@@ -1,8 +1,6 @@
 package com.github.vmssilva.calculator.engine.std.functions;
 
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import com.github.vmssilva.calculator.engine.context.ApplicationContext;
 import com.github.vmssilva.calculator.engine.std.type.ValueType;
@@ -10,7 +8,7 @@ import com.github.vmssilva.calculator.engine.utils.Validators;
 import com.github.vmssilva.calculator.engine.std.value.FunctionValue;
 import com.github.vmssilva.calculator.engine.std.value.Value;
 
-public class BuiltinFunction implements FunctionValue, Callable {
+public class BuiltinFunction implements FunctionValue {
 
   private ApplicationContext context;
   private FunctionValue delegate;
@@ -21,9 +19,9 @@ public class BuiltinFunction implements FunctionValue, Callable {
   }
 
   @Override
-  public Value apply(ApplicationContext ctx, List<Value> args) {
+  public Value call(ApplicationContext ctx, List<Value> args) {
     Validators.validate(delegate, args);
-    return delegate.apply(context, args);
+    return delegate.call(context, args);
   }
 
   @Override
@@ -33,11 +31,7 @@ public class BuiltinFunction implements FunctionValue, Callable {
 
   @Override
   public String toString() {
-    return name() + "(" +
-        Arrays.asList(parameters()).stream()
-            .map(p -> p.value())
-            .collect(Collectors.joining(", "))
-        + ")";
+    return delegate.toString();
   }
 
   @Override
@@ -47,7 +41,7 @@ public class BuiltinFunction implements FunctionValue, Callable {
 
   @Override
   public FunctionValue unwrap() {
-    return delegate;
+    return delegate.unwrap();
   }
 
 }

@@ -23,7 +23,7 @@ public record LambdaNode(List<String> params, Node body) implements Node {
       private final Scope closure = closureScope;
 
       @Override
-      public Value apply(ApplicationContext ctx, List<Value> args) {
+      public Value call(ApplicationContext ctx, List<Value> args) {
 
         List<String> paramNames = params();
 
