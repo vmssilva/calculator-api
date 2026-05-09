@@ -14,21 +14,21 @@ public record BinaryExpression(Node left, Node right, String operator) implement
   public Value interpret(ApplicationContext context) {
     return switch (operator) {
       case "+" ->
-        ((FunctionValue) context.get("add")).apply(context, List.of(left.interpret(context), right.interpret(context)));
+        ((FunctionValue) context.get("add")).call(context, List.of(left.interpret(context), right.interpret(context)));
       case "-" ->
         ((FunctionValue) context.get("subtract"))
-            .apply(context, List.of(left.interpret(context), right.interpret(context)));
+            .call(context, List.of(left.interpret(context), right.interpret(context)));
       case "*" ->
         ((FunctionValue) context.get("multiply"))
-            .apply(context, List.of(left.interpret(context), right.interpret(context)));
+            .call(context, List.of(left.interpret(context), right.interpret(context)));
       case "/" ->
         ((FunctionValue) context.get("divide"))
-            .apply(context, List.of(left.interpret(context), right.interpret(context)));
+            .call(context, List.of(left.interpret(context), right.interpret(context)));
       case "%" ->
         ((FunctionValue) context.get("percentage"))
-            .apply(context, List.of(left.interpret(context), right.interpret(context)));
+            .call(context, List.of(left.interpret(context), right.interpret(context)));
       case "^" ->
-        ((FunctionValue) context.get("pow")).apply(context, List.of(left.interpret(context), right.interpret(context)));
+        ((FunctionValue) context.get("pow")).call(context, List.of(left.interpret(context), right.interpret(context)));
       default -> throw new ExecutionErrorException("Invalid operation: " + operator);
     };
   }
