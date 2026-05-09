@@ -20,4 +20,5 @@ public record NumberValue(BigDecimal value) implements Value<BigDecimal> {
   public BigDecimal unwrap() {
     return value;
   }
+
 }

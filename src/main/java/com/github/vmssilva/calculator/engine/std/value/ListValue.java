@@ -18,7 +18,7 @@ public record ListValue(List<Value> values) implements Value<List<Value>> {
 
   @Override
   public final String toString() {
-    return "";
+    return values.toString();
   }
 
 }
