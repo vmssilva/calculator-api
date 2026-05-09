@@ -10,10 +10,11 @@ import com.github.vmssilva.calculator.engine.ast.IdentifierNode;
 import com.github.vmssilva.calculator.engine.ast.LambdaNode;
 import com.github.vmssilva.calculator.engine.ast.Node;
 import com.github.vmssilva.calculator.engine.ast.ProgramNode;
+import com.github.vmssilva.calculator.engine.ast.StringNode;
 import com.github.vmssilva.calculator.engine.ast.VarNode;
-import com.github.vmssilva.calculator.engine.ast.expressions.BinaryExpression;
-import com.github.vmssilva.calculator.engine.ast.expressions.NumberExpression;
-import com.github.vmssilva.calculator.engine.ast.expressions.UnaryExpression;
+import com.github.vmssilva.calculator.engine.ast.BinaryNode;
+import com.github.vmssilva.calculator.engine.ast.NumberNode;
+import com.github.vmssilva.calculator.engine.ast.UnaryNode;
 import com.github.vmssilva.calculator.engine.exception.CalculatorParserException;
 import com.github.vmssilva.calculator.engine.lexer.Lexer;
 import com.github.vmssilva.calculator.engine.lexer.SimpleLexer;
@@ -80,7 +81,7 @@ public final class RecursiveAstParser implements Parser {
       }
 
       Node right = term();
-      expr = new BinaryExpression(expr, right, operator);
+      expr = new BinaryNode(expr, right, operator);
 
     }
 
@@ -99,7 +100,7 @@ public final class RecursiveAstParser implements Parser {
 
       Node right = factor();
 
-      expr = new BinaryExpression(expr, right, operator);
+      expr = new BinaryNode(expr, right, operator);
     }
 
     return expr;
@@ -116,7 +117,7 @@ public final class RecursiveAstParser implements Parser {
         syntaxError(0, pos);
 
       Node right = power();
-      return new BinaryExpression(left, right, operator.value());
+      return new BinaryNode(left, right, operator.value());
     }
 
     return left;
@@ -132,7 +133,7 @@ public final class RecursiveAstParser implements Parser {
         syntaxError(line, pos);
       }
 
-      return new UnaryExpression(op, factor());
+      return new UnaryNode(op, factor());
     }
 
     // 2. grouping OR lambda
@@ -191,7 +192,11 @@ public final class RecursiveAstParser implements Parser {
 
     // 5. number
     if (match(TokenType.NUMBER)) {
-      return new NumberExpression(new BigDecimal(advance().value()));
+      return new NumberNode(new BigDecimal(advance().value()));
+    }
+
+    if (match(TokenType.STRING)) {
+      return new StringNode(advance().value());
     }
 
     throw new CalculatorParserException("Unexpected token in factor", line, pos);
@@ -238,6 +243,7 @@ public final class RecursiveAstParser implements Parser {
       List<Node> args = new ArrayList<>();
 
       if (!match(TokenType.RPAREN)) {
+
         args.add(expression());
 
         while (match(TokenType.COMMA)) {

@@ -14,4 +14,9 @@ public record StringValue(String value) implements Value<String> {
     return value;
   }
 
+  @Override
+  public final String toString() {
+    return value;
+  }
+
 }

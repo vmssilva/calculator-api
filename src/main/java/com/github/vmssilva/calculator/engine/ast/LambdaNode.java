@@ -2,10 +2,10 @@ package com.github.vmssilva.calculator.engine.ast;
 
 import java.util.List;
 
-import com.github.vmssilva.calculator.engine.ast.expressions.NumberExpression;
 import com.github.vmssilva.calculator.engine.context.ApplicationContext;
 import com.github.vmssilva.calculator.engine.context.Scope;
 import com.github.vmssilva.calculator.engine.exception.ReturnValueException;
+import com.github.vmssilva.calculator.engine.utils.AstPrinter;
 import com.github.vmssilva.calculator.engine.utils.Validators;
 import com.github.vmssilva.calculator.engine.std.type.ValueType;
 import com.github.vmssilva.calculator.engine.std.value.FunctionValue;
@@ -93,40 +93,7 @@ public record LambdaNode(List<String> params, Node body) implements Node {
 
       @Override
       public String toString() {
-        return "(" + String.join(", ", params) + ") -> " + formatBody(body);
-      }
-
-      private String formatBody(Node node) {
-        if (node instanceof IdentifierNode id) {
-
-          if (context.has(id.name())) {
-            return context.get(id.name()).toString();
-          }
-          return id.name();
-        }
-        if (node instanceof LambdaNode lambda) {
-
-          String params = lambda.params().stream()
-              .map(p -> p)
-              .collect(java.util.stream.Collectors.joining(", "));
-
-          return "(" + params + ") -> " + formatBody(lambda.body());
-        }
-
-        return formatNode(node);
-      }
-
-      private String formatNode(Node node) {
-
-        if (node instanceof IdentifierNode id) {
-          return id.name();
-        }
-
-        if (node instanceof NumberExpression num) {
-          return num.value().toString();
-        }
-
-        return node.toString();
+        return "(" + String.join(", ", params) + ") -> " + AstPrinter.print(body);
       }
 
       @Override

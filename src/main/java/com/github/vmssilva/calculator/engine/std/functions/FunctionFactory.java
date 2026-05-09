@@ -1,6 +1,8 @@
 package com.github.vmssilva.calculator.engine.std.functions;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.github.vmssilva.calculator.engine.context.ApplicationContext;
 import com.github.vmssilva.calculator.engine.std.type.ValueType;
@@ -23,6 +25,15 @@ public final class FunctionFactory {
       @Override
       public String name() {
         return name;
+      }
+
+      @Override
+      public String toString() {
+        return name() + "(" +
+            Arrays.stream(parameters())
+                .map(p -> p.value())
+                .collect(Collectors.joining(", "))
+            + ")";
       }
 
       @Override
