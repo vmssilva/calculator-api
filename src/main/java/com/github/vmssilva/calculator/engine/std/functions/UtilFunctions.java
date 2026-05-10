@@ -1,81 +1,75 @@
 package com.github.vmssilva.calculator.engine.std.functions;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.github.vmssilva.calculator.engine.context.ApplicationContext;
 import com.github.vmssilva.calculator.engine.context.Scope;
 import com.github.vmssilva.calculator.engine.exception.ValueErrorException;
-import com.github.vmssilva.calculator.engine.std.type.ValueType;
 import com.github.vmssilva.calculator.engine.std.value.FunctionValue;
 import com.github.vmssilva.calculator.engine.std.value.ListValue;
-import com.github.vmssilva.calculator.engine.std.value.NumberValue;
+import com.github.vmssilva.calculator.engine.std.value.StringValue;
+import com.github.vmssilva.calculator.engine.std.value.UnitValue;
 import com.github.vmssilva.calculator.engine.std.value.Value;
 import com.github.vmssilva.calculator.engine.std.value.Values;
+import com.github.vmssilva.calculator.engine.utils.FunctionPrinter;
 
-public class UtilFunctions {
+public final class UtilFunctions {
 
-  public static FunctionValue unset() {
-    return FunctionFactory.of("unset", (context, args) -> {
-
-      // if (args.get(0).type() != ValueType.STRING) {
-      // throw new ValueErrorException("unset expect String argument");
-      // }
-
-      var name = Values.asString(args.get(0));
-
-      boolean removed = context.remove(name);
-
-      if (!removed) {
-        throw new ValueErrorException("variable '" + name + "' not found in current scope");
-      }
-
-      return new NumberValue(BigDecimal.ZERO);
-
-    }, new ValueType[] { ValueType.STRING });
-
+  private UtilFunctions() {
   }
 
-  public static FunctionValue env() {
-    return FunctionFactory.of("env", (context, args) -> {
+  @Builtin(name = "unset", description = "Remove variable from current scope")
+  public static Value unset(ApplicationContext context, StringValue s) {
 
-      List<Value> lines = new ArrayList<>();
+    String name = s.unwrap();
+    boolean removed = context.remove(name);
 
-      if (!args.isEmpty()) {
-        throw new ValueErrorException("env() takes no arguments");
-      }
+    if (!removed) {
+      throw new ValueErrorException(
+          "variable '" + name + "' not found in current scope");
+    }
 
-      Scope scope = context.currentScope();
-      Map<String, Value> seen = new LinkedHashMap<>();
-
-      while (scope != null) {
-
-        for (var entry : scope.entries().entrySet()) {
-          seen.putIfAbsent(entry.getKey(), entry.getValue());
-        }
-
-        scope = scope.getParent();
-      }
-
-      seen.entrySet().stream()
-          .sorted(Map.Entry.comparingByKey())
-          .forEach(entry -> {
-
-            var name = entry.getKey();
-            var value = entry.getValue();
-
-            if (value instanceof FunctionValue fn) {
-              lines.add(Values.of("fn " + name + " -> " + fn));
-            } else {
-              lines.add(Values.of("var " + name + " = " + value));
-            }
-          });
-
-      return new ListValue(lines);
-
-    }, new ValueType[] {});
+    return UnitValue.INSTANCE;
   }
 
+  @Builtin(name = "env", description = "List current environment variables")
+  public static Value env(ApplicationContext context) {
+
+    List<Value> lines = new ArrayList<>();
+
+    Scope scope = context.snapshot();
+
+    Map<String, Value> seen = new LinkedHashMap<>();
+
+    while (scope != null) {
+
+      for (var entry : scope.entries().entrySet()) {
+        seen.putIfAbsent(entry.getKey(), entry.getValue());
+      }
+
+      scope = scope.getParent();
+    }
+
+    seen.entrySet()
+        .stream()
+        .sorted(Map.Entry.comparingByKey())
+        .forEach(entry -> {
+
+          var name = entry.getKey();
+          var value = entry.getValue();
+
+          if (value instanceof FunctionValue fn) {
+            lines.add(
+                Values.of(FunctionPrinter.formatWithPrefix(name, fn)));
+          } else {
+            lines.add(
+                Values.of("var " + name + " = " + value.type().value()));
+          }
+        });
+
+    return new ListValue(lines);
+  }
 }

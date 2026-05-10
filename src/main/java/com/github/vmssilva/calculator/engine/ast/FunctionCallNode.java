@@ -18,9 +18,14 @@ public record FunctionCallNode(Node target, List<Node> args) implements Node {
       throw new ExecutionErrorException("Target is not a function");
     }
 
-    var evaluated = args.stream()
-        .map(arg -> arg.interpret(context))
-        .toList();
+    // Value[] evaluated = args.stream()
+    // .map(arg -> arg.interpret(context))
+    // .toArray(Value[]::new);
+    Value[] evaluated = new Value[args.size()];
+
+    for (int i = 0; i < args.size(); i++) {
+      evaluated[i] = args.get(i).interpret(context);
+    }
 
     return fn.call(context, evaluated);
   }

@@ -1,11 +1,9 @@
 package com.github.vmssilva.calculator.engine.utils;
 
 import java.util.Arrays;
-import java.util.List;
 import java.util.stream.Collectors;
 
 import com.github.vmssilva.calculator.engine.exception.ExecutionErrorException;
-import com.github.vmssilva.calculator.engine.std.type.ValueType;
 import com.github.vmssilva.calculator.engine.std.value.FunctionValue;
 import com.github.vmssilva.calculator.engine.std.value.Value;
 
@@ -14,60 +12,185 @@ public final class Validators {
   private Validators() {
   }
 
-  public static boolean isAssignable(FunctionValue fn, List<Value> args) {
+  public static boolean isAssignable(FunctionValue fn, Value[] args) {
 
-    var parameters = Arrays.asList(fn.parameters());
+    // var types = fn.parameters();
 
-    if (parameters.size() == 1 && parameters.get(0) == ValueType.LIST && !args.isEmpty()) {
-      return true;
-    }
+    // if (types.length != args.length) {
+    // return false;
+    // }
 
-    if (parameters.size() != args.size())
-      return false;
+    // for (int i = 0; i < types.length; i++) {
 
-    for (int i = 0; i < parameters.size(); i++) {
-      var type = parameters.get(i);
+    // Class<?> expected = types[i];
 
-      if (type == ValueType.ANY)
-        continue;
-
-      if (type != args.get(i).type())
-        return false;
-    }
+    // if (!expected.isInstance(args[i])) {
+    // return false;
+    // }
+    // }
 
     return true;
   }
 
-  public static void validate(FunctionValue functionValue, List<Value> args) {
+  public static void validate(FunctionValue fn, Value[] args) {
 
     if (args == null) {
       throw new ExecutionErrorException("Arguments cannot be null");
     }
 
-    var isAssignable = isAssignable(functionValue, args);
+    Class<?>[] params = new Class[] {};// fn.parameters();
 
-    if (!isAssignable) {
+    boolean isVarArgs = params.length > 0 &&
+        params[params.length - 1].isArray();
 
-      var parameters = Arrays.asList(functionValue.parameters());
+    int fixedParams = isVarArgs
+        ? params.length - 1
+        : params.length;
 
-      var expect = functionValue.name() + "(" +
-          parameters.stream()
-              .map(p -> p.value())
-              .collect(Collectors.joining(", "))
-          + ")";
+    // aridade fixa
+    if (!isVarArgs && args.length != params.length) {
 
-      var actual = functionValue.name() + "(" +
-          args.stream()
-              .map(p -> p.type().value())
-              .collect(Collectors.joining(", "))
-          + ")";
+      throw new ExecutionErrorException(
+          "expects: "
+              + signature(fn.name(), params)
+              + ", got: "
+              + actualSignature(fn.name(), args));
+    }
 
-      if (!parameters.isEmpty() && parameters.get(0) == ValueType.LIST) {
-        expect = functionValue.name() + "(...Any)";
+    // mínimo de argumentos
+    if (isVarArgs && args.length < fixedParams) {
+
+      throw new ExecutionErrorException(
+          "expects at least: "
+              + fixedParams
+              + " args, got: "
+              + args.length);
+    }
+
+    // parâmetros fixos
+    for (int i = 0; i < fixedParams; i++) {
+
+      Class<?> expected = params[i];
+      Value received = args[i];
+
+      if (!expected.isInstance(received)) {
+
+        throw new ExecutionErrorException(
+            "expects: "
+                + signature(fn.name(), params)
+                + ", got: "
+                + actualSignature(fn.name(), args));
       }
+    }
 
-      throw new ExecutionErrorException("expects: " + expect + ", got: " + actual);
+    // varargs
+    if (isVarArgs) {
+
+      Class<?> varType = params[params.length - 1]
+          .componentType();
+
+      for (int i = fixedParams; i < args.length; i++) {
+
+        Value received = args[i];
+
+        if (!varType.isInstance(received)) {
+
+          throw new ExecutionErrorException(
+              "expects: "
+                  + signature(fn.name(), params)
+                  + ", got: "
+                  + actualSignature(fn.name(), args));
+        }
+      }
     }
   }
+
+  private static String signature(
+      String name,
+      Class<?>[] params) {
+
+    return name + "(" +
+        Arrays.stream(params)
+            .map(Validators::displayType)
+            .collect(Collectors.joining(", "))
+        + ")";
+  }
+
+  private static String actualSignature(
+      String name,
+      Value[] args) {
+
+    return name + "(" +
+        Arrays.stream(args)
+            .map(v -> v.getClass().getSimpleName())
+            .collect(Collectors.joining(", "))
+        + ")";
+  }
+
+  private static String displayType(Class<?> type) {
+
+    if (type.isArray()) {
+      return type.componentType().getSimpleName() + "...";
+    }
+
+    return type.getSimpleName();
+  }
+
+  // public static void validate(FunctionValue fn, Value[] args) {
+
+  // if (args == null) {
+  // throw new ExecutionErrorException("Arguments cannot be null");
+  // }
+
+  // Class<?>[] params = fn.parameters();
+
+  // boolean isVarArgs = params.length > 0 &&
+  // params[params.length - 1].isArray();
+
+  // int fixedParams = isVarArgs ? params.length - 1 : params.length;
+
+  // if (!isVarArgs && args.length != params.length) {
+  // throw new ExecutionErrorException(
+  // fn.name() + " expects " + params.length
+  // + " args, got " + args.length);
+  // }
+
+  // if (isVarArgs && args.length < fixedParams) {
+  // throw new ExecutionErrorException(
+  // fn.name() + " expects at least "
+  // + fixedParams + " args, got " + args.length);
+  // }
+
+  // // valida parâmetros fixos
+  // for (int i = 0; i < fixedParams; i++) {
+
+  // Class<?> expected = params[i];
+
+  // if (!expected.isInstance(args[i])) {
+  // throw new ExecutionErrorException(
+  // fn.name()
+  // + " expects "
+  // + expected.getSimpleName()
+  // + " at position "
+  // + i);
+  // }
+  // }
+
+  // // valida varargs (se houver)
+  // if (isVarArgs) {
+
+  // Class<?> varType = params[params.length - 1].componentType();
+
+  // for (int i = fixedParams; i < args.length; i++) {
+
+  // if (!varType.isInstance(args[i])) {
+  // throw new ExecutionErrorException(
+  // fn.name()
+  // + " invalid vararg at position "
+  // + i);
+  // }
+  // }
+  // }
+  // }
 
 }

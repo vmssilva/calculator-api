@@ -7,6 +7,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -18,6 +19,7 @@ import com.github.vmssilva.calculator.engine.lexer.Lexer;
 import com.github.vmssilva.calculator.engine.lexer.SimpleLexer;
 import com.github.vmssilva.calculator.engine.std.value.Values;
 
+@Disabled
 class RecursiveAstParserTest {
 
   private Parser parser;

@@ -1,7 +1,5 @@
 package com.github.vmssilva.calculator.engine.ast;
 
-import java.util.List;
-
 import com.github.vmssilva.calculator.engine.context.ApplicationContext;
 import com.github.vmssilva.calculator.engine.exception.ExecutionErrorException;
 import com.github.vmssilva.calculator.engine.std.value.FunctionValue;
@@ -30,7 +28,7 @@ public record BinaryNode(Node _left, Node _right, String operator) implements No
 
   private Value call(ApplicationContext context, String name, Value a, Value b) {
     return ((FunctionValue) context.get(name))
-        .call(context, List.of(a, b));
+        .call(context, new Value[] { a, b });
   }
 
   private Value add(Value left, Value right) {

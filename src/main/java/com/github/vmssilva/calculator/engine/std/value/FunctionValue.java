@@ -5,7 +5,7 @@ import com.github.vmssilva.calculator.engine.std.type.ValueType;
 
 public interface FunctionValue extends Value<FunctionValue>, Callable {
 
-  ValueType[] parameters();
+  // Class<?>[] parameters();
 
   default String name() {
     return "<function>";

@@ -3,6 +3,7 @@ package com.github.vmssilva.calculator.engine.std.value;
 import java.math.BigDecimal;
 
 import com.github.vmssilva.calculator.engine.exception.CalculatorRuntimeException;
+import com.github.vmssilva.calculator.engine.exception.ExecutionErrorException;
 
 public final class Values {
 
@@ -35,7 +36,7 @@ public final class Values {
   public static BigDecimal asNumber(Value v) {
     if (v instanceof NumberValue n)
       return new BigDecimal(formatNumber(n.unwrap()));
-    throw new RuntimeException("Expected number but got " + v.getClass());
+    throw new ExecutionErrorException("Expected number but got " + v.getClass().getSimpleName());
   }
 
   public static String asString(Value v) {

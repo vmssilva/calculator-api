@@ -47,6 +47,7 @@ public class CalculatorRuntime {
     } catch (ValueErrorException | ExecutionErrorException | CalculatorParserException | CalculatorLexerException e) {
       throw e;
     } catch (Exception rt) {
+      rt.printStackTrace();
       throw new RuntimeException("Unknown error");
     }
   }
