@@ -3,9 +3,9 @@ package com.github.vmssilva.calculator.engine.std.value;
 import com.github.vmssilva.calculator.engine.std.functions.Callable;
 import com.github.vmssilva.calculator.engine.std.type.ValueType;
 
-public interface FunctionValue extends Value<FunctionValue>, Callable {
+public interface FunctionValue extends Value, Callable {
 
-  // Class<?>[] parameters();
+  ValueType[] parameters();
 
   default String name() {
     return "<function>";
@@ -19,6 +19,10 @@ public interface FunctionValue extends Value<FunctionValue>, Callable {
   @Override
   default FunctionValue unwrap() {
     return this;
+  }
+
+  default boolean isVarArgs() {
+    return false;
   }
 
 }

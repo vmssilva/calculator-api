@@ -5,29 +5,46 @@ import java.util.List;
 import com.github.vmssilva.calculator.engine.context.ApplicationContext;
 import com.github.vmssilva.calculator.engine.exception.ExecutionErrorException;
 import com.github.vmssilva.calculator.engine.std.value.FunctionValue;
+import com.github.vmssilva.calculator.engine.std.value.ListValue;
 import com.github.vmssilva.calculator.engine.std.value.Value;
 
 public record FunctionCallNode(Node target, List<Node> args) implements Node {
-
   @Override
   public Value interpret(ApplicationContext context) {
 
-    Value value = target.interpret(context);
-
-    if (!(value instanceof FunctionValue fn)) {
-      throw new ExecutionErrorException("Target is not a function");
-    }
-
-    // Value[] evaluated = args.stream()
-    // .map(arg -> arg.interpret(context))
-    // .toArray(Value[]::new);
     Value[] evaluated = new Value[args.size()];
 
     for (int i = 0; i < args.size(); i++) {
       evaluated[i] = args.get(i).interpret(context);
     }
 
-    return fn.call(context, evaluated);
+    if (target instanceof IdentifierNode id) {
+      return context.resolve(id.name(), evaluated);
+    }
+
+    // fallback: expressão qualquer
+    Value value = target.interpret(context);
+
+    if (value instanceof FunctionValue fn) {
+      return fn.call(context, evaluated);
+    }
+
+    // overload set
+    if (value instanceof ListValue list) {
+
+      List<FunctionValue> overloads = list.values().stream()
+          .filter(FunctionValue.class::isInstance)
+          .map(FunctionValue.class::cast)
+          .toList();
+
+      if (!overloads.isEmpty()) {
+        return context.resolve(overloads, evaluated);
+      }
+    }
+
+    throw new ExecutionErrorException(
+        "Target is not callable");
+
   }
 
   @Override
@@ -49,4 +66,5 @@ public record FunctionCallNode(Node target, List<Node> args) implements Node {
 
     return repr.toString();
   }
+
 }

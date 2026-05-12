@@ -4,17 +4,7 @@ import java.math.BigDecimal;
 
 import com.github.vmssilva.calculator.engine.std.type.ValueType;
 
-public class NumberValue implements Value<BigDecimal> {
-
-  private BigDecimal value;
-
-  public NumberValue(String value) {
-    this.value = new BigDecimal(value);
-  }
-
-  public NumberValue(BigDecimal value) {
-    this.value = value;
-  }
+public record DecimalValue(BigDecimal value) implements Value<BigDecimal> {
 
   @Override
   public final String toString() {

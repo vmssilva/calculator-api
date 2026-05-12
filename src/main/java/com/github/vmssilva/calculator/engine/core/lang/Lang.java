@@ -20,13 +20,13 @@ public final class Lang {
 
     List<Value> result = new ArrayList<>();
 
-    context.snapshot().entries().forEach((name, value) -> {
+    // context.snapshot().entries().forEach((name, value) -> {
 
-      if (!(value instanceof FunctionValue)) {
-        result.add(new BindingValue(name, value));
-      }
+    // if (!(value instanceof FunctionValue)) {
+    // result.add(new BindingValue(name, value));
+    // }
 
-    });
+    // });
 
     return new ListValue(result);
   }
@@ -34,11 +34,11 @@ public final class Lang {
   public static Value fns(ApplicationContext context) {
     List<Value> result = new ArrayList<>();
 
-    for (Map.Entry<String, Value> e : context.snapshot().entries().entrySet()) {
-      if (e.getValue() instanceof FunctionValue fn) {
-        result.add(Values.of(fn.name()));
-      }
-    }
+    // for (Map.Entry<String, Value> e : context.snapshot().entries().entrySet()) {
+    // if (e.getValue() instanceof FunctionValue fn) {
+    // result.add(Values.of(fn.name()));
+    // }
+    // }
 
     return new ListValue(result);
   }

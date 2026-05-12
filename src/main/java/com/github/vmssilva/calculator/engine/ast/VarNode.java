@@ -8,7 +8,8 @@ public record VarNode(String name, Node node) implements Node {
   public Value interpret(ApplicationContext context) {
     var value = node.interpret(context);
 
-    context.set(name, value);
+    context.define(name, value);
+
     return value;
   }
 

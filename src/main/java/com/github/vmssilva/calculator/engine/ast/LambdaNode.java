@@ -7,6 +7,7 @@ import com.github.vmssilva.calculator.engine.context.Scope;
 import com.github.vmssilva.calculator.engine.exception.ExecutionErrorException;
 import com.github.vmssilva.calculator.engine.exception.ReturnValueException;
 import com.github.vmssilva.calculator.engine.utils.AstPrinter;
+import com.github.vmssilva.calculator.engine.std.type.ValueType;
 import com.github.vmssilva.calculator.engine.std.value.FunctionValue;
 import com.github.vmssilva.calculator.engine.std.value.Value;
 
@@ -39,7 +40,11 @@ public record LambdaNode(List<String> params, Node body) implements Node {
         try {
 
           for (int i = 0; i < args.length; i++) {
-            local.set(paramNames.get(i), args[i]);
+            if (args[i] instanceof FunctionValue fn) {
+              local.defineFunction(paramNames.get(i), fn);
+            } else {
+              local.defineVariable(paramNames.get(i), args[i]);
+            }
           }
 
           try {
@@ -61,10 +66,13 @@ public record LambdaNode(List<String> params, Node body) implements Node {
             + AstPrinter.print(body);
       }
 
-      // @Override
-      // public Class<?>[] parameters() {
-      // return new Class<?>[params.size()];
-      // }
+      @Override
+      public ValueType[] parameters() {
+        return params.stream()
+            .map(p -> ValueType.ANY)
+            .toArray(ValueType[]::new);
+      }
+
     };
   }
 

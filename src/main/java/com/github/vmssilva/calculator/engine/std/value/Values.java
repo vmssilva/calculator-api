@@ -12,23 +12,25 @@ public final class Values {
     if (type instanceof BigDecimal value)
       return new NumberValue(value);
 
-    if (type instanceof Short value)
-      return new NumberValue(new BigDecimal(value));
-
     if (type instanceof Integer value)
-      return new NumberValue(new BigDecimal(value));
-
-    if (type instanceof Float value)
-      return new NumberValue(new BigDecimal(value));
+      return new IntValue(value);
 
     if (type instanceof Double value)
-      return new NumberValue(new BigDecimal(value));
-
-    if (type instanceof Long value)
-      return new NumberValue(new BigDecimal(value));
+      return new DoubleValue(value);
 
     if (type instanceof String value)
       return new StringValue(value);
+
+    // if (type instanceof Short value)
+    // return new ShortValue(value);
+    //
+    // if (type instanceof Float value)
+    // return new FloatValue(value);
+    //
+    //
+    // if (type instanceof Long value)
+    // return new LongValue(value);
+    //
 
     throw new CalculatorRuntimeException("Invalid format");
   }

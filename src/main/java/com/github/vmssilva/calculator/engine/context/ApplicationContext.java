@@ -1,15 +1,18 @@
 package com.github.vmssilva.calculator.engine.context;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
+import com.github.vmssilva.calculator.engine.exception.ExecutionErrorException;
 import com.github.vmssilva.calculator.engine.std.constants.Constants;
 import com.github.vmssilva.calculator.engine.std.functions.Builtin;
 import com.github.vmssilva.calculator.engine.std.functions.FunctionFactory;
 import com.github.vmssilva.calculator.engine.std.functions.MathFunctions;
 import com.github.vmssilva.calculator.engine.std.functions.PredicateFunctions;
+import com.github.vmssilva.calculator.engine.std.functions.StringFunctions;
 import com.github.vmssilva.calculator.engine.std.functions.UtilFunctions;
 import com.github.vmssilva.calculator.engine.std.value.FunctionValue;
+import com.github.vmssilva.calculator.engine.std.value.ListValue;
 import com.github.vmssilva.calculator.engine.std.value.Value;
 
 public class ApplicationContext implements ContextCapabilities {
@@ -44,84 +47,114 @@ public class ApplicationContext implements ContextCapabilities {
   // =========================
   // VARIABLES API (PUBLIC SAFE)
   // =========================
-
   @Override
-  public void set(String name, Value value) {
-    current.set(name, value);
+  public Value resolve(String name) {
+    // variável tem prioridade
+    // Value variable = resolveVariable(name);
+
+    if (current.hasVariable(name))
+      return resolveVariable(name);
+
+    List<FunctionValue> overloads = current.resolveFunctions(name);
+
+    if (overloads == null || overloads.isEmpty()) {
+      throw new ExecutionErrorException(
+          "'" + name + "' is not defined");
+    }
+
+    // apenas uma função
+    if (overloads.size() == 1) {
+      return overloads.get(0);
+    }
+
+    // múltiplos overloads
+    return new ListValue(new ArrayList<>(overloads));
+
+  }
+
+  public Value resolve(List<FunctionValue> overloads, Value... args) {
+    return current.resolveFunction(overloads, args).call(this, args);
   }
 
   @Override
-  public Value get(String name) {
-    return current.get(name);
+  public FunctionValue resolve(String name, int arity) {
+    return current.resolveFunction(name, arity);
   }
 
   @Override
-  public boolean has(String name) {
-    return current.has(name);
+  public Value resolve(String name, Value... args) {
+    return current.resolveFunction(name, args).call(this, args);
   }
 
   @Override
-  public boolean remove(String name) {
-    return current.remove(name);
+  public FunctionValue getFunction(String name, FunctionValue fn) {
+    return current.getFunction(name, fn);
   }
 
-  /**
-   * Snapshot imutável da stack de escopos.
-   * Evita vazamento de estrutura interna.
-   */
+  public void define(String name, Value value) {
+    if (value instanceof FunctionValue fn) {
+      defineFunction(name, fn);
+      return;
+    }
+    defineVariable(name, value);
+  }
+
+  @Override
+  public void defineFunction(String name, FunctionValue fn) {
+    current.defineFunction(name, fn);
+  }
+
+  @Override
+  public FunctionValue resolveFunction(String name, Value... args) {
+    return current.resolveFunction(name, args);
+  }
+
+  @Override
+  public void defineVariable(String name, Value value) {
+    current.defineVariable(name, value);
+  }
+
+  @Override
+  public Value resolveVariable(String name) {
+    return current.resolveVariable(name);
+  }
+
+  public boolean hasVariable(String name) {
+    return current.hasVariable(name);
+  }
+
+  public boolean hasFunction(String name) {
+    return current.hasFunction(name);
+  }
+
+  public boolean removeVariable(String name) {
+    return current.removeVariable(name);
+  }
+
+  public boolean removeFunction(String name, FunctionValue fn) {
+    return current.removeFunction(name, fn);
+  }
+
   @Override
   public Scope snapshot() {
     return current;
   }
 
-  public void addFunction(String name, FunctionValue fn) {
-    current.set(name, fn);
-  }
-
-  // =========================
-  // SAFE INTROSPECTION (IMPORTANT CHANGE)
-  // =========================
-
-  /**
-   * Acesso somente leitura ao escopo de builtins.
-   * NÃO expõe o scope completo da runtime.
-   */
   public Scope builtins() {
     return builtins;
-  }
-
-  // =========================
-  // INTERNAL STATE (NOT EXPOSED)
-  // =========================
-
-  public Scope currentScopeInternal() {
-    return current;
-  }
-
-  public List<String> listVariables() {
-    return current.entries().entrySet().stream()
-        .filter(e -> !(e.getValue() instanceof FunctionValue))
-        .map(Map.Entry::getKey)
-        .toList();
-  }
-
-  public List<String> listFunctions() {
-    return current.entries().entrySet().stream()
-        .filter(e -> e.getValue() instanceof FunctionValue)
-        .map(Map.Entry::getKey)
-        .toList();
   }
 
   // Builtins loader
   private void loadBuiltins(Scope builtins) {
 
     for (Constants constant : Constants.values()) {
-      builtins.set(constant.key(), constant.value());
+      builtins.defineVariable(constant.key(), constant.value());
     }
 
     scanBuiltins(builtins, MathFunctions.class);
     scanBuiltins(builtins, PredicateFunctions.class);
     scanBuiltins(builtins, UtilFunctions.class);
+    scanBuiltins(builtins, StringFunctions.class);
 
   }
 
@@ -137,7 +170,7 @@ public class ApplicationContext implements ContextCapabilities {
 
       FunctionValue function = FunctionFactory.of(method);
 
-      builtins.set(builtin.name(), function);
+      builtins.defineFunction(builtin.name(), function);
     }
   }
 

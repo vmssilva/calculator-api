@@ -21,11 +21,11 @@ public final class FunctionPrinter {
     // + ")";
   }
 
-  public static String format(FunctionValue fn, Value[] args) {
+  public static String print(FunctionValue fn, Value[] args) {
 
     return fn.name() + "(" +
         Arrays.stream(args)
-            .map(v -> v.type().value())
+            .map(v -> v.type().friendly())
             .collect(Collectors.joining(", "))
         + ")";
   }

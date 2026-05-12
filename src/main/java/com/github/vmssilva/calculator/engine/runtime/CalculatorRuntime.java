@@ -37,8 +37,8 @@ public class CalculatorRuntime {
           .parse(expression)
           .interpret(context);
 
-      if (result instanceof NumberValue && context.has("scale")) {
-        int scale = Values.asNumber(context.get("scale")).intValue();
+      if (result instanceof NumberValue && context.hasVariable("scale")) {
+        int scale = Values.asNumber(context.resolve("scale")).intValue();
         result = new NumberValue(Values.asNumber(result).setScale(scale, RoundingMode.HALF_UP));
       }
 

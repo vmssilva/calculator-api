@@ -1,24 +1,29 @@
 package com.github.vmssilva.calculator.engine.context;
 
+import com.github.vmssilva.calculator.engine.std.value.FunctionValue;
 import com.github.vmssilva.calculator.engine.std.value.Value;
 
 public interface ContextCapabilities {
 
-  // leitura
-  Value get(String name);
+  void defineVariable(String name, Value value);
 
-  boolean has(String name);
+  void defineFunction(String name, FunctionValue function);
 
-  // mutação controlada
-  void set(String name, Value value);
+  FunctionValue getFunction(String name, FunctionValue fn);
 
-  boolean remove(String name);
+  Value resolveVariable(String name);
 
-  // escopo
+  Value resolve(String name);
+
+  Value resolve(String name, int arity);
+
+  Value resolve(String name, Value... args);
+
+  Value resolveFunction(String name, Value... args);
+
   void pushScope();
 
   void popScope();
 
-  // introspecção segura
   Scope snapshot();
 }

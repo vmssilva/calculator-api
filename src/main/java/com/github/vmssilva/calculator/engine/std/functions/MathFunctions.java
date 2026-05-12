@@ -60,6 +60,9 @@ public final class MathFunctions {
   @Builtin(name = "min", description = "Return the smallest number")
   public static Value min(ApplicationContext context, NumberValue... args) {
 
+    if (args.length == 0)
+      return Values.of(0);
+
     BigDecimal min = args[0].unwrap();
 
     for (int i = 1; i < args.length; i++) {
@@ -76,6 +79,9 @@ public final class MathFunctions {
 
   @Builtin(name = "max", description = "Return the largest number")
   public static Value max(ApplicationContext context, NumberValue... args) {
+
+    if (args.length == 0)
+      return Values.of(0);
 
     BigDecimal max = args[0].unwrap();
 
@@ -114,11 +120,9 @@ public final class MathFunctions {
   // Square root
 
   @Builtin(name = "sqrt", description = "Square root")
-  public static Value sqrt(
-      ApplicationContext context,
-      Value... args) {
+  public static Value sqrt(ApplicationContext context, NumberValue n) {
 
-    var v = Values.asNumber(args[0]);
+    var v = n.unwrap();
 
     if (v.compareTo(BigDecimal.ZERO) < 0) {
       throw new ValueErrorException(
@@ -130,300 +134,183 @@ public final class MathFunctions {
   }
 
   @Builtin(name = "abs", description = "Absolute value")
-  public static Value abs(
-      ApplicationContext context,
-      Value... args) {
-
-    var x = Values.asNumber(args[0]);
-
-    return new NumberValue(x.abs());
+  public static Value abs(ApplicationContext context, NumberValue n) {
+    return new NumberValue(n.unwrap().abs());
   }
 
   @Builtin(name = "sign", description = "Sign of a number")
-  public static Value sign(
-      ApplicationContext context,
-      Value... args) {
+  public static Value sign(ApplicationContext context, NumberValue n) {
 
-    var x = Values.asNumber(args[0]);
-
-    int sign = x.compareTo(BigDecimal.ZERO);
+    int sign = n.unwrap().compareTo(BigDecimal.ZERO);
 
     return new NumberValue(
         BigDecimal.valueOf(sign));
   }
 
   @Builtin(name = "pow", description = "Power function")
-  public static Value pow(
-      ApplicationContext context,
-      Value... args) {
+  public static Value pow(ApplicationContext context, NumberValue base, NumberValue exp) {
 
-    var base = Values.asNumber(args[0]);
-    var exp = Values.asNumber(args[1]);
+    var left = base.unwrap();
+    var right = exp.unwrap();
 
-    return new NumberValue(
-        BigDecimal.valueOf(
-            Math.pow(
-                base.doubleValue(),
-                exp.doubleValue())));
+    return new NumberValue(BigDecimal.valueOf(Math.pow(left.doubleValue(), right.doubleValue())));
   }
 
   @Builtin(name = "exp", description = "Exponential function")
-  public static Value exp(
-      ApplicationContext context,
-      Value... args) {
-
-    var x = Values.asNumber(args[0]);
-
-    return new NumberValue(
-        BigDecimal.valueOf(
-            Math.exp(x.doubleValue())));
+  public static Value exp(ApplicationContext context, NumberValue n) {
+    return new NumberValue(BigDecimal.valueOf(Math.exp(n.unwrap().doubleValue())));
   }
 
   @Builtin(name = "log", description = "Logarithm with base")
-  public static Value log(
-      ApplicationContext context,
-      Value... args) {
+  public static Value log(ApplicationContext context, NumberValue x, NumberValue base) {
 
-    var x = Values.asNumber(args[0]);
-    var base = Values.asNumber(args[1]);
+    var _x = x.unwrap();
+    var _base = base.unwrap();
 
-    if (x.compareTo(BigDecimal.ZERO) <= 0) {
+    if (_x.compareTo(BigDecimal.ZERO) <= 0) {
       throw new ValueErrorException(
           "log(x, base): x must be > 0");
     }
 
-    if (base.compareTo(BigDecimal.ZERO) <= 0
-        || base.compareTo(BigDecimal.ONE) == 0) {
+    if (_base.compareTo(BigDecimal.ZERO) <= 0
+        || _base.compareTo(BigDecimal.ONE) == 0) {
       throw new ValueErrorException(
           "log(x, base): base must be > 0 and != 1");
     }
 
-    double result = Math.log(x.doubleValue())
-        / Math.log(base.doubleValue());
+    double result = Math.log(_x.doubleValue())
+        / Math.log(_base.doubleValue());
 
     return new NumberValue(
         BigDecimal.valueOf(result));
   }
 
   @Builtin(name = "ln", description = "Natural logarithm")
-  public static Value ln(
-      ApplicationContext context,
-      Value... args) {
+  public static Value ln(ApplicationContext context, NumberValue n) {
 
-    var x = Values.asNumber(args[0]);
+    var x = n.unwrap();
 
     if (x.compareTo(BigDecimal.ZERO) <= 0) {
       throw new ValueErrorException(
           "ln(x): x must be > 0");
     }
 
-    return new NumberValue(
-        BigDecimal.valueOf(
-            Math.log(x.doubleValue())));
+    return new NumberValue(BigDecimal.valueOf(Math.log(x.doubleValue())));
   }
 
   @Builtin(name = "log10", description = "Base-10 logarithm")
-  public static Value log10(
-      ApplicationContext context,
-      Value... args) {
+  public static Value log10(ApplicationContext context, NumberValue n) {
 
-    var x = Values.asNumber(args[0]);
+    var x = n.unwrap();
 
     if (x.compareTo(BigDecimal.ZERO) <= 0) {
       throw new ValueErrorException(
           "log10(x): x must be > 0");
     }
 
-    return new NumberValue(
-        BigDecimal.valueOf(
-            Math.log10(x.doubleValue())));
+    return new NumberValue(BigDecimal.valueOf(Math.log10(x.doubleValue())));
   }
 
   // =========================
   // GEOMETRY
   // =========================
   @Builtin(name = "hypot", description = "Hypotenuse of two numbers")
-  public static Value hypot(
-      ApplicationContext context,
-      Value... args) {
+  public static Value hypot(ApplicationContext context, NumberValue x, NumberValue y) {
 
-    var x = Values.asNumber(args[0]);
-    var y = Values.asNumber(args[1]);
+    var l = x.unwrap();
+    var r = y.unwrap();
 
-    return new NumberValue(
-        BigDecimal.valueOf(
-            Math.hypot(
-                x.doubleValue(),
-                y.doubleValue())));
+    return new NumberValue(BigDecimal.valueOf(Math.hypot(l.doubleValue(), r.doubleValue())));
   }
 
   @Builtin(name = "clamp", description = "Clamp value between min and max")
-  public static Value clamp(
-      ApplicationContext context,
-      Value... args) {
+  public static Value clamp(ApplicationContext context, NumberValue value, NumberValue min, NumberValue max) {
 
-    var value = Values.asNumber(args[0]);
-    var min = Values.asNumber(args[1]);
-    var max = Values.asNumber(args[2]);
+    var _value = value.unwrap();
+    var _min = min.unwrap();
+    var _max = max.unwrap();
 
-    if (value.compareTo(min) < 0) {
-      return new NumberValue(min);
+    if (_value.compareTo(_min) < 0) {
+      return new NumberValue(_min);
     }
 
-    if (value.compareTo(max) > 0) {
-      return new NumberValue(max);
+    if (_value.compareTo(_max) > 0) {
+      return new NumberValue(_max);
     }
 
-    return new NumberValue(value);
+    return new NumberValue(_value);
   }
 
   // TRIG
   @Builtin(name = "sin", description = "Sine function")
-  public static Value sin(
-      ApplicationContext context,
-      Value... args) {
-
-    return new NumberValue(
-        BigDecimal.valueOf(
-            Math.sin(
-                Values.asNumber(args[0]).doubleValue())));
+  public static Value sin(ApplicationContext context, NumberValue n) {
+    return new NumberValue(BigDecimal.valueOf(Math.sin(n.unwrap().doubleValue())));
   }
 
   @Builtin(name = "cos", description = "Cosine function")
-  public static Value cos(
-      ApplicationContext context,
-      Value... args) {
-
-    return new NumberValue(
-        BigDecimal.valueOf(
-            Math.cos(
-                Values.asNumber(args[0]).doubleValue())));
+  public static Value cos(ApplicationContext context, NumberValue n) {
+    return new NumberValue(BigDecimal.valueOf(Math.cos(n.unwrap().doubleValue())));
   }
 
   @Builtin(name = "tan", description = "Tangent function")
-  public static Value tan(
-      ApplicationContext context,
-      Value... args) {
-
-    return new NumberValue(
-        BigDecimal.valueOf(
-            Math.tan(
-                Values.asNumber(args[0]).doubleValue())));
+  public static Value tan(ApplicationContext context, NumberValue n) {
+    return new NumberValue(BigDecimal.valueOf(Math.tan(n.unwrap().doubleValue())));
   }
 
   @Builtin(name = "asin", description = "Arc sine function")
-  public static Value asin(
-      ApplicationContext context,
-      Value... args) {
-
-    return new NumberValue(
-        BigDecimal.valueOf(
-            Math.asin(
-                Values.asNumber(args[0]).doubleValue())));
+  public static Value asin(ApplicationContext context, NumberValue n) {
+    return new NumberValue(BigDecimal.valueOf(Math.asin(n.unwrap().doubleValue())));
   }
 
   @Builtin(name = "acos", description = "Arc cosine function")
-  public static Value acos(
-      ApplicationContext context,
-      Value... args) {
-
-    return new NumberValue(
-        BigDecimal.valueOf(
-            Math.acos(
-                Values.asNumber(args[0]).doubleValue())));
+  public static Value acos(ApplicationContext context, NumberValue n) {
+    return new NumberValue(BigDecimal.valueOf(Math.acos(n.unwrap().doubleValue())));
   }
 
   @Builtin(name = "atan", description = "Arc tangent function")
-  public static Value atan(
-      ApplicationContext context,
-      Value... args) {
-
-    return new NumberValue(
-        BigDecimal.valueOf(
-            Math.atan(
-                Values.asNumber(args[0]).doubleValue())));
+  public static Value atan(ApplicationContext context, NumberValue n) {
+    return new NumberValue(BigDecimal.valueOf(Math.atan(n.unwrap().doubleValue())));
   }
 
   // =========================
   // ANGLES
   // =========================
   @Builtin(name = "deg", description = "Convert radians to degrees")
-  public static Value deg(
-      ApplicationContext context,
-      Value... args) {
-
-    var x = Values.asNumber(args[0]);
-
-    return new NumberValue(
-        BigDecimal.valueOf(
-            Math.toDegrees(x.doubleValue())));
+  public static Value deg(ApplicationContext context, NumberValue n) {
+    return new NumberValue(BigDecimal.valueOf(Math.toDegrees(n.unwrap().doubleValue())));
   }
 
   @Builtin(name = "rad", description = "Convert degrees to radians")
-  public static Value rad(
-      ApplicationContext context,
-      Value... args) {
-
-    var x = Values.asNumber(args[0]);
-
-    return new NumberValue(
-        BigDecimal.valueOf(
-            Math.toRadians(x.doubleValue())));
+  public static Value rad(ApplicationContext context, NumberValue n) {
+    return new NumberValue(BigDecimal.valueOf(Math.toRadians(n.unwrap().doubleValue())));
   }
 
   // Rounding
   @Builtin(name = "round", description = "Round number")
-  public static Value round(
-      ApplicationContext context,
-      Value... args) {
-
-    var x = Values.asNumber(args[0]);
-
-    return new NumberValue(
-        BigDecimal.valueOf(
-            Math.round(x.doubleValue())));
+  public static Value round(ApplicationContext context, NumberValue n) {
+    return new NumberValue(BigDecimal.valueOf(Math.round(n.unwrap().doubleValue())));
   }
 
   @Builtin(name = "floor", description = "Floor number")
-  public static Value floor(
-      ApplicationContext context,
-      Value... args) {
-
-    var x = Values.asNumber(args[0]);
-
-    return new NumberValue(
-        BigDecimal.valueOf(
-            Math.floor(x.doubleValue())));
+  public static Value floor(ApplicationContext context, NumberValue n) {
+    return new NumberValue(BigDecimal.valueOf(Math.floor(n.unwrap().doubleValue())));
   }
 
   @Builtin(name = "ceil", description = "Ceil number")
-  public static Value ceil(
-      ApplicationContext context,
-      Value... args) {
-
-    var x = Values.asNumber(args[0]);
-
-    return new NumberValue(
-        BigDecimal.valueOf(
-            Math.ceil(x.doubleValue())));
+  public static Value ceil(ApplicationContext context, NumberValue n) {
+    return new NumberValue(BigDecimal.valueOf(Math.ceil(n.unwrap().doubleValue())));
   }
 
   // Utilities
   @Builtin(name = "truncate", description = "Truncate decimal part")
-  public static Value truncate(
-      ApplicationContext context,
-      Value... args) {
-
-    var x = Values.asNumber(args[0]);
-
-    return new NumberValue(
-        x.setScale(0, RoundingMode.DOWN));
+  public static Value truncate(ApplicationContext context, NumberValue n) {
+    return new NumberValue(n.unwrap().setScale(0, RoundingMode.DOWN));
   }
 
   @Builtin(name = "factorial", description = "Factorial of a non-negative integer")
-  public static Value factorial(ApplicationContext context, Value... args) {
+  public static Value factorial(ApplicationContext context, NumberValue x) {
 
-    var value = Values.asNumber(args[0]);
+    var value = x.unwrap();
 
     if (value.compareTo(BigDecimal.ZERO) < 0) {
       throw new ValueErrorException("factorial of negative number");

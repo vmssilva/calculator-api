@@ -27,8 +27,9 @@ public record BinaryNode(Node _left, Node _right, String operator) implements No
   }
 
   private Value call(ApplicationContext context, String name, Value a, Value b) {
-    return ((FunctionValue) context.get(name))
-        .call(context, new Value[] { a, b });
+    // return ((FunctionValue) context.resolve(name))
+    // .call(context, new Value[] { a, b });
+    return context.resolve(name, new Value[] { a, b });
   }
 
   private Value add(Value left, Value right) {
