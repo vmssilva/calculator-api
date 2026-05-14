@@ -69,7 +69,7 @@ public record LambdaNode(List<String> params, Node body) implements Node {
       @Override
       public ValueType[] parameters() {
         return params.stream()
-            .map(p -> ValueType.ANY)
+            .map(p -> p)
             .toArray(ValueType[]::new);
       }
 

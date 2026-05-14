@@ -1,6 +1,5 @@
 package com.github.vmssilva.calculator.engine.parser;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -18,6 +17,10 @@ import com.github.vmssilva.calculator.engine.ast.UnaryNode;
 import com.github.vmssilva.calculator.engine.exception.CalculatorParserException;
 import com.github.vmssilva.calculator.engine.lexer.Lexer;
 import com.github.vmssilva.calculator.engine.lexer.SimpleLexer;
+import com.github.vmssilva.calculator.engine.std.value.DoubleValue;
+import com.github.vmssilva.calculator.engine.std.value.IntValue;
+import com.github.vmssilva.calculator.engine.std.value.LongValue;
+import com.github.vmssilva.calculator.engine.std.value.NumberValue;
 import com.github.vmssilva.calculator.engine.token.Token;
 import com.github.vmssilva.calculator.engine.token.TokenType;
 
@@ -173,6 +176,8 @@ public final class RecursiveAstParser implements Parser {
 
         Node lambda = new LambdaNode(params, body);
 
+        System.out.println(lambda);
+
         return parseCall(lambda);
 
       }
@@ -192,7 +197,9 @@ public final class RecursiveAstParser implements Parser {
 
     // 5. number
     if (match(TokenType.NUMBER)) {
-      return new NumberNode(new BigDecimal(advance().value()));
+      // return new NumberNode(new BigDecimal(advance().value()));
+      var number = parseNumber(advance().value());
+      return new NumberNode(number);
     }
 
     if (match(TokenType.STRING)) {
@@ -200,6 +207,42 @@ public final class RecursiveAstParser implements Parser {
     }
 
     throw new CalculatorParserException("Unexpected token in factor", line, pos);
+  }
+
+  private NumberValue parseNumber(String raw) {
+
+    try {
+
+      // decimal/scientific
+      if (raw.contains(".") ||
+          raw.contains("e") ||
+          raw.contains("E")) {
+
+        return new DoubleValue(
+            Double.parseDouble(raw));
+      }
+
+      try {
+        return new IntValue(
+            Integer.parseInt(raw));
+      } catch (NumberFormatException ignored) {
+      }
+
+      try {
+        return new LongValue(
+            Long.parseLong(raw));
+      } catch (NumberFormatException ignored) {
+      }
+
+      // largest int
+      return new DoubleValue(
+          Double.parseDouble(raw));
+
+    } catch (NumberFormatException ex) {
+
+      throw new CalculatorParserException(
+          "Invalid numeric literal: '" + raw + "'");
+    }
   }
 
   private Node parseAssignment() {

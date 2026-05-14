@@ -2,10 +2,14 @@ package com.github.vmssilva.calculator.engine.ast;
 
 import com.github.vmssilva.calculator.engine.context.ApplicationContext;
 import com.github.vmssilva.calculator.engine.exception.ExecutionErrorException;
+import com.github.vmssilva.calculator.engine.std.value.DecimalValue;
+import com.github.vmssilva.calculator.engine.std.value.DoubleValue;
 import com.github.vmssilva.calculator.engine.std.value.FunctionValue;
+import com.github.vmssilva.calculator.engine.std.value.IntValue;
 import com.github.vmssilva.calculator.engine.std.value.NumberValue;
 import com.github.vmssilva.calculator.engine.std.value.StringValue;
 import com.github.vmssilva.calculator.engine.std.value.Value;
+import com.github.vmssilva.calculator.engine.std.value.Values;
 
 public record BinaryNode(Node _left, Node _right, String operator) implements Node {
 
@@ -27,8 +31,6 @@ public record BinaryNode(Node _left, Node _right, String operator) implements No
   }
 
   private Value call(ApplicationContext context, String name, Value a, Value b) {
-    // return ((FunctionValue) context.resolve(name))
-    // .call(context, new Value[] { a, b });
     return context.resolve(name, new Value[] { a, b });
   }
 
@@ -48,8 +50,20 @@ public record BinaryNode(Node _left, Node _right, String operator) implements No
           left.unwrap().toString() + right.unwrap().toString());
     }
 
-    if (left instanceof NumberValue l && right instanceof NumberValue r) {
-      return new NumberValue(l.unwrap().add(r.unwrap()));
+    if (NumberValue.class.isAssignableFrom(left.getClass()) &&
+        NumberValue.class.isAssignableFrom(right.getClass())) {
+
+      if (left instanceof DecimalValue l && right instanceof DecimalValue r) {
+        return Values.of(l.unwrap().add(r.unwrap()));
+      }
+
+      if (left instanceof DoubleValue a && right instanceof DoubleValue b) {
+        return Values.of(a.unwrap() + b.unwrap());
+      }
+
+      if (left instanceof IntValue a && right instanceof IntValue b) {
+        return Values.of(a.unwrap() + b.unwrap());
+      }
     }
 
     throw new ExecutionErrorException(

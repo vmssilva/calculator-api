@@ -3,7 +3,6 @@ package com.github.vmssilva.calculator.engine.core.lang;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import com.github.vmssilva.calculator.engine.context.ApplicationContext;
 import com.github.vmssilva.calculator.engine.std.value.*;
@@ -63,7 +62,7 @@ public final class Lang {
 
       Value result = fn.call(context, v);
 
-      if (Values.asNumber(result).compareTo(BigDecimal.ZERO) != 0) {
+      if (Values.asDecimal(result).compareTo(BigDecimal.ZERO) != 0) {
         out.add(v);
       }
     }

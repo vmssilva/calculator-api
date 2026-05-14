@@ -6,9 +6,9 @@ import com.github.vmssilva.calculator.engine.std.value.StringValue;
 import com.github.vmssilva.calculator.engine.std.value.UnitValue;
 import com.github.vmssilva.calculator.engine.std.value.Value;
 
-public final class UtilFunctions {
+public final class UtilBuiltins {
 
-  private UtilFunctions() {
+  private UtilBuiltins() {
   }
 
   @Builtin(name = "unset", description = "Remove variable from current scope")

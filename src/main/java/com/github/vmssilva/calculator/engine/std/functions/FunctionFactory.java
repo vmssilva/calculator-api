@@ -27,7 +27,6 @@ public final class FunctionFactory {
     return new BuiltinFunctionValue(method, builtin.name());
   }
 
-  // Private impl
   private static final class BuiltinFunctionValue implements FunctionValue {
 
     private final Method method;

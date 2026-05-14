@@ -7,10 +7,11 @@ import com.github.vmssilva.calculator.engine.exception.ExecutionErrorException;
 import com.github.vmssilva.calculator.engine.std.constants.Constants;
 import com.github.vmssilva.calculator.engine.std.functions.Builtin;
 import com.github.vmssilva.calculator.engine.std.functions.FunctionFactory;
-import com.github.vmssilva.calculator.engine.std.functions.MathFunctions;
-import com.github.vmssilva.calculator.engine.std.functions.PredicateFunctions;
-import com.github.vmssilva.calculator.engine.std.functions.StringFunctions;
-import com.github.vmssilva.calculator.engine.std.functions.UtilFunctions;
+import com.github.vmssilva.calculator.engine.std.functions.MathBuiltins;
+import com.github.vmssilva.calculator.engine.std.functions.PredicateBuiltins;
+import com.github.vmssilva.calculator.engine.std.functions.StringBuiltins;
+import com.github.vmssilva.calculator.engine.std.functions.TypeBuiltins;
+import com.github.vmssilva.calculator.engine.std.functions.UtilBuiltins;
 import com.github.vmssilva.calculator.engine.std.value.FunctionValue;
 import com.github.vmssilva.calculator.engine.std.value.ListValue;
 import com.github.vmssilva.calculator.engine.std.value.Value;
@@ -151,10 +152,11 @@ public class ApplicationContext implements ContextCapabilities {
       builtins.defineVariable(constant.key(), constant.value());
     }
 
-    scanBuiltins(builtins, MathFunctions.class);
-    scanBuiltins(builtins, PredicateFunctions.class);
-    scanBuiltins(builtins, UtilFunctions.class);
-    scanBuiltins(builtins, StringFunctions.class);
+    scanBuiltins(builtins, MathBuiltins.class);
+    scanBuiltins(builtins, PredicateBuiltins.class);
+    scanBuiltins(builtins, UtilBuiltins.class);
+    scanBuiltins(builtins, StringBuiltins.class);
+    scanBuiltins(builtins, TypeBuiltins.class);
 
   }
 

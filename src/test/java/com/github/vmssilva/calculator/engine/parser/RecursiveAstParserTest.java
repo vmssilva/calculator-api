@@ -34,7 +34,7 @@ class RecursiveAstParserTest {
 
   private BigDecimal eval(String expr) {
     Node ast = parser.parse(expr);
-    var value = Values.asNumber(ast.interpret(ctx));
+    var value = Values.asDecimal(ast.interpret(ctx));
     return value.setScale(2, RoundingMode.HALF_UP);
   }
 

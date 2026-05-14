@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 
 import com.github.vmssilva.calculator.engine.std.type.ValueType;
 
-public record DoubleValue(Double value) implements NumberValue<Double> {
+public record LongValue(Long value) implements NumberValue<Long> {
 
   @Override
   public final String toString() {
@@ -13,11 +13,11 @@ public record DoubleValue(Double value) implements NumberValue<Double> {
 
   @Override
   public ValueType type() {
-    return ValueType.DOUBLE;
+    return ValueType.LONG;
   }
 
   @Override
-  public Double unwrap() {
+  public Long unwrap() {
     return value;
   }
 

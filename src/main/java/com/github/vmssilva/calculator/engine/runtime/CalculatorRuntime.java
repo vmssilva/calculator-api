@@ -10,6 +10,7 @@ import com.github.vmssilva.calculator.engine.exception.CalculatorParserException
 import com.github.vmssilva.calculator.engine.exception.ExecutionErrorException;
 import com.github.vmssilva.calculator.engine.exception.ValueErrorException;
 import com.github.vmssilva.calculator.engine.parser.RecursiveAstParser;
+import com.github.vmssilva.calculator.engine.std.value.DecimalValue;
 import com.github.vmssilva.calculator.engine.std.value.NumberValue;
 import com.github.vmssilva.calculator.engine.std.value.Value;
 import com.github.vmssilva.calculator.engine.std.value.Values;
@@ -28,7 +29,7 @@ public class CalculatorRuntime {
 
   public void run(Node ast) {
     var node = ast.interpret(context);
-    System.out.println(Values.asNumber(node));
+    System.out.println(Values.asDecimal(node));
   }
 
   public Value evaluate(String expression, ApplicationContext context) {
@@ -38,17 +39,19 @@ public class CalculatorRuntime {
           .interpret(context);
 
       if (result instanceof NumberValue && context.hasVariable("scale")) {
-        int scale = Values.asNumber(context.resolve("scale")).intValue();
-        result = new NumberValue(Values.asNumber(result).setScale(scale, RoundingMode.HALF_UP));
+        int scale = Values.asDecimal(context.resolve("scale")).intValue();
+        result = new DecimalValue(Values.asDecimal(result).setScale(scale, RoundingMode.HALF_UP));
       }
 
       return result;
 
     } catch (ValueErrorException | ExecutionErrorException | CalculatorParserException | CalculatorLexerException e) {
-      throw e;
-    } catch (Exception rt) {
+      throw new ExecutionErrorException(e.getMessage());
+    } catch (ArrayIndexOutOfBoundsException ex) {
+      throw new ExecutionErrorException(ex.getMessage());
+    } catch (RuntimeException rt) {
       rt.printStackTrace();
-      throw new RuntimeException("Unknown error");
+      throw new ExecutionErrorException(rt.getMessage());
     }
   }
 

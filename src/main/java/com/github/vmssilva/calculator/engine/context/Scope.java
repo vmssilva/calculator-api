@@ -180,6 +180,7 @@ public final class Scope {
     for (FunctionValue fn : overloads) {
 
       ValueType[] params = fn.parameters();
+
       boolean varArgs = fn.isVarArgs(); // instanceof BuiltinFunctionValue b
       // && b.getMethod().isVarArgs(); // OU equivalente interno
 
@@ -230,6 +231,86 @@ public final class Scope {
   }
 
   // HELPER CLASSES
+  private static final class FunctionMatcher {
+
+    static boolean matches(ValueType[] params, boolean varArgs, Value[] args) {
+
+      int fixed = varArgs ? params.length - 1 : params.length;
+
+      if (args.length < fixed) {
+        return false;
+      }
+
+      if (!varArgs) {
+
+        if (args.length != params.length) {
+          return false;
+        }
+
+        for (int i = 0; i < params.length; i++) {
+          if (!params[i].accepts(args[i])) {
+            return false;
+          }
+        }
+
+        return true;
+      }
+
+      for (int i = 0; i < fixed; i++) {
+
+        if (!params[i].accepts(args[i])) {
+          return false;
+        }
+      }
+
+      ValueType varType = params[params.length - 1];
+
+      for (int i = fixed; i < args.length; i++) {
+
+        if (!varType.accepts(args[i])) {
+          return false;
+        }
+      }
+
+      return true;
+    }
+
+    static boolean isBetter(FunctionValue a, FunctionValue b) {
+
+      boolean aVar = a.isVarArgs();
+      boolean bVar = b.isVarArgs();
+
+      if (!aVar && bVar)
+        return true;
+      if (aVar && !bVar)
+        return false;
+
+      return a.parameters().length < b.parameters().length;
+    }
+
+    static boolean sameSignature(FunctionValue a, FunctionValue b) {
+
+      ValueType[] ap = a.parameters();
+      ValueType[] bp = b.parameters();
+
+      if (a.isVarArgs() != b.isVarArgs()) {
+        return false;
+      }
+
+      if (ap.length != bp.length) {
+        return false;
+      }
+
+      for (int i = 0; i < ap.length; i++) {
+        if (ap[i] != bp[i]) {
+          return false;
+        }
+      }
+
+      return true;
+    }
+  }
+
   private static final class FunctionDiagnostics {
 
     static String buildError(
@@ -302,99 +383,6 @@ public final class Scope {
 
       return "%s(%s)"
           .formatted(name, String.join(", ", parts));
-    }
-  }
-
-  private static final class FunctionMatcher {
-
-    static boolean matches(ValueType[] params, boolean varArgs, Value[] args) {
-
-      int fixed = varArgs ? params.length - 1 : params.length;
-
-      if (args.length < fixed) {
-        return false;
-      }
-
-      if (!varArgs) {
-
-        if (args.length != params.length) {
-          return false;
-        }
-
-        for (int i = 0; i < params.length; i++) {
-          if (params[i] != args[i].type()) {
-            if (params[i] == ValueType.ANY)
-              continue;
-
-            return false;
-          }
-        }
-
-        return true;
-      }
-
-      for (int i = 0; i < fixed; i++) {
-        if (params[i] != args[i].type()) {
-          if (params[i] == ValueType.ANY)
-            continue;
-
-          return false;
-        }
-      }
-
-      ValueType varType = params[params.length - 1];
-
-      for (int i = fixed; i < args.length; i++) {
-        if (!typeMatches(varType, args[i].type())) {
-          return false;
-        }
-      }
-
-      return true;
-    }
-
-    private static boolean typeMatches(ValueType expected, ValueType actual) {
-
-      if (expected == ValueType.ANY) {
-        return true;
-      }
-
-      return expected == actual;
-    }
-
-    static boolean isBetter(FunctionValue a, FunctionValue b) {
-
-      boolean aVar = a.isVarArgs();
-      boolean bVar = b.isVarArgs();
-
-      if (!aVar && bVar)
-        return true;
-      if (aVar && !bVar)
-        return false;
-
-      return a.parameters().length < b.parameters().length;
-    }
-
-    static boolean sameSignature(FunctionValue a, FunctionValue b) {
-
-      ValueType[] ap = a.parameters();
-      ValueType[] bp = b.parameters();
-
-      if (a.isVarArgs() != b.isVarArgs()) {
-        return false;
-      }
-
-      if (ap.length != bp.length) {
-        return false;
-      }
-
-      for (int i = 0; i < ap.length; i++) {
-        if (ap[i] != bp[i]) {
-          return false;
-        }
-      }
-
-      return true;
     }
   }
 
