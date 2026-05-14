@@ -11,4 +11,8 @@ public record StringNode(String value) implements Node {
     return new StringValue(value);
   }
 
+  @Override
+  public final String toString() {
+    return value;
+  }
 }

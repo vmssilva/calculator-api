@@ -179,6 +179,7 @@ public final class SimpleLexer implements Lexer {
       case '\\' -> "\\";
       case '"' -> "\"";
       case 't' -> "\t";
+      case 'r' -> "\r";
       case 'f' -> "\f";
       case 'b' -> "\b";
       case 'n' -> "\n";
