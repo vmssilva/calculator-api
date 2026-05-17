@@ -3,7 +3,12 @@ package com.github.vmssilva.calculator.engine.exception;
 public class CalculatorRuntimeException extends RuntimeException {
 
   public CalculatorRuntimeException(String message) {
-    super("RuntimeError: " + message);
+    super(message);
+  }
+
+  @Override
+  public String getMessage() {
+    return super.getMessage();
   }
 
   @Override

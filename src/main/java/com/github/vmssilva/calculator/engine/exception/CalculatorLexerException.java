@@ -6,7 +6,7 @@ public class CalculatorLexerException extends RuntimeException {
   private int column;
 
   public CalculatorLexerException(String message) {
-    super("LexerError: " + message);
+    super(message);
   }
 
   public CalculatorLexerException(String message, int line, int column) {
@@ -14,6 +14,11 @@ public class CalculatorLexerException extends RuntimeException {
 
     this.line = line;
     this.column = column;
+  }
+
+  @Override
+  public String getMessage() {
+    return super.getMessage();
   }
 
   public int getLine() {

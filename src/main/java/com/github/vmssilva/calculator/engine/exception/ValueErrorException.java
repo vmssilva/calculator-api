@@ -2,7 +2,12 @@ package com.github.vmssilva.calculator.engine.exception;
 
 public class ValueErrorException extends RuntimeException {
   public ValueErrorException(String message) {
-    super("ValueError: " + message);
+    super(message);
+  }
+
+  @Override
+  public String getMessage() {
+    return super.getMessage();
   }
 
   @Override

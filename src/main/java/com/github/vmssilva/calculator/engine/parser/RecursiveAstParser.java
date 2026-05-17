@@ -260,7 +260,7 @@ public final class RecursiveAstParser implements Parser {
 
       // case 2: function definition (syntactic sugar)
       if (left instanceof FunctionCallNode call &&
-          call.target() instanceof IdentifierNode fn &&
+          call.property() instanceof IdentifierNode fn &&
           call.args().stream().allMatch(arg -> arg instanceof IdentifierNode)) {
 
         List<String> params = call.args().stream()
@@ -280,28 +280,74 @@ public final class RecursiveAstParser implements Parser {
 
   private Node parseCall(Node callee) {
 
-    while (match(TokenType.LPAREN)) {
-      advance(); // (
+    List<Node> args = new ArrayList<>();
 
-      List<Node> args = new ArrayList<>();
+    Node prop = null;
 
-      if (!match(TokenType.RPAREN)) {
+    while (true) {
 
-        args.add(expression());
+      // =========================
+      // FUNCTION CALL
+      // =========================
+      if (match(TokenType.LPAREN)) {
 
-        while (match(TokenType.COMMA)) {
-          advance();
-          args.add(expression());
-        }
+        advance();
+
+        args = parseArguments();
+
+        expect(TokenType.RPAREN);
+        advance();
+
+        callee = new FunctionCallNode(
+            callee,
+            prop,
+            args);
+
+        continue;
       }
 
-      expect(TokenType.RPAREN);
-      advance();
+      // =========================
+      // MEMBER ACCESS / MODULE / PROPERTY
+      // =========================
+      if (match(TokenType.DOT)) {
+        advance();
+        expect(TokenType.IDENTIFIER);
 
-      callee = new FunctionCallNode(callee, args);
+        prop = new IdentifierNode(advance().value());
+
+        // Token identifier = advance();
+
+        // prop = new IdentifierNode(identifier.value());
+
+        // Node access = new FunctionCallNode(
+        // callee, prop, args);
+
+        // callee = access;
+
+        continue;
+      }
+
+      break;
     }
 
     return callee;
+  }
+
+  private List<Node> parseArguments() {
+
+    List<Node> args = new ArrayList<>();
+
+    if (!match(TokenType.RPAREN)) {
+
+      args.add(expression());
+
+      while (match(TokenType.COMMA)) {
+        advance();
+        args.add(expression());
+      }
+    }
+
+    return args;
   }
 
   private boolean isOperator() {

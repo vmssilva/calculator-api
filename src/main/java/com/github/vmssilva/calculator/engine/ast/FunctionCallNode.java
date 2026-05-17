@@ -5,10 +5,10 @@ import java.util.List;
 import com.github.vmssilva.calculator.engine.context.ApplicationContext;
 import com.github.vmssilva.calculator.engine.exception.ExecutionErrorException;
 import com.github.vmssilva.calculator.engine.std.value.FunctionValue;
-import com.github.vmssilva.calculator.engine.std.value.ListValue;
 import com.github.vmssilva.calculator.engine.std.value.Value;
 
-public record FunctionCallNode(Node target, List<Node> args) implements Node {
+public record FunctionCallNode(Node module, Node property, List<Node> args) implements Node {
+
   @Override
   public Value interpret(ApplicationContext context) {
 
@@ -18,40 +18,31 @@ public record FunctionCallNode(Node target, List<Node> args) implements Node {
       evaluated[i] = args.get(i).interpret(context);
     }
 
-    if (target instanceof IdentifierNode id) {
+    if (property instanceof IdentifierNode prop) {
+      Value mod = module.interpret(context);
+      return context.resolve(mod, prop.name(), evaluated);
+    }
+
+    if (module instanceof IdentifierNode id) {
       return context.resolve(id.name(), evaluated);
     }
 
-    // fallback: expressão qualquer
-    Value value = target.interpret(context);
+    // Call
+    Value value = module.interpret(context);
 
     if (value instanceof FunctionValue fn) {
       return fn.call(context, evaluated);
     }
 
-    // overload set
-    if (value instanceof ListValue list) {
-
-      List<FunctionValue> overloads = list.values().stream()
-          .filter(FunctionValue.class::isInstance)
-          .map(FunctionValue.class::cast)
-          .toList();
-
-      if (!overloads.isEmpty()) {
-        return context.resolve(overloads, evaluated);
-      }
-    }
-
     throw new ExecutionErrorException(
-        "Target is not callable");
-
+        "Value is not callable");
   }
 
   @Override
   public final String toString() {
     StringBuilder repr = new StringBuilder();
 
-    repr.append(target).append("(");
+    repr.append(module).append("(");
     for (int i = 0; i < args.size(); i++) {
       if (args.isEmpty())
         break;

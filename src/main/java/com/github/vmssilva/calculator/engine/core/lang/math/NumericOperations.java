@@ -1,4 +1,4 @@
-package com.github.vmssilva.calculator.engine.utils;
+package com.github.vmssilva.calculator.engine.core.lang.math;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -10,8 +10,9 @@ import com.github.vmssilva.calculator.engine.std.value.DoubleValue;
 import com.github.vmssilva.calculator.engine.std.value.IntValue;
 import com.github.vmssilva.calculator.engine.std.value.LongValue;
 import com.github.vmssilva.calculator.engine.std.value.NumberValue;
+import com.github.vmssilva.calculator.engine.std.value.Value;
 
-public class NumericOperations {
+public abstract class NumericOperations implements Value {
 
   private NumericOperations() {
   }

@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import com.github.vmssilva.calculator.engine.exception.ExecutionErrorException;
 import com.github.vmssilva.calculator.engine.std.type.ValueType;
 import com.github.vmssilva.calculator.engine.std.value.FunctionValue;
+import com.github.vmssilva.calculator.engine.std.value.StringValue;
 import com.github.vmssilva.calculator.engine.std.value.Value;
 
 public final class Scope {
@@ -114,23 +115,23 @@ public final class Scope {
         FunctionDiagnostics.buildFunctionNotFoundError(name, fn, overloads));
   }
 
-  public Value resolveVariable(String name) {
+  public List<Value> getVariable(String name) {
 
     Value value = variables.get(name);
 
     if (value != null) {
-      return value;
+      return List.of(new StringValue(name), value);
     }
 
     if (parent != null) {
-      return parent.resolveVariable(name);
+      return parent.getVariable(name);
     }
 
-    throw new ExecutionErrorException(
-        "Undefined variable '%s'".formatted(name));
+    return null;
+
   }
 
-  public List<FunctionValue> resolveFunctions(String name) {
+  public List<FunctionValue> getFunctions(String name) {
 
     List<FunctionValue> overloads = functions.get(name);
 
@@ -139,40 +140,35 @@ public final class Scope {
     }
 
     if (parent != null) {
-      return parent.resolveFunctions(name);
+      return parent.getFunctions(name);
     }
 
-    throw new ExecutionErrorException(
-        "Undefined function '%s'".formatted(name));
+    return List.of();
   }
 
-  public FunctionValue resolveFunction(String name, int arity) {
+  public FunctionValue getFunction(String name, int arity) {
 
-    List<FunctionValue> overloads = resolveFunctions(name);
+    List<FunctionValue> overloads = getFunctions(name);
 
     for (FunctionValue fn : overloads) {
-
       if (fn.parameters().length == arity) {
         return fn;
       }
     }
 
-    throw new ExecutionErrorException(
-        "No overload of function '%s' matches arity %d"
-            .formatted(name, arity));
+    return null;
   }
 
-  public FunctionValue resolveFunction(String name, Value... args) {
+  public FunctionValue getFunction(String name, Value... args) {
 
     List<FunctionValue> overloads = functions.get(name);
 
     if ((overloads == null || overloads.isEmpty()) && parent != null) {
-      return parent.resolveFunction(name, args);
+      return parent.getFunction(name, args);
     }
 
     if (overloads == null || overloads.isEmpty()) {
-      throw new ExecutionErrorException(
-          "Undefined function '%s'".formatted(name));
+      return null;
     }
 
     FunctionValue bestMatch = null;
@@ -197,11 +193,10 @@ public final class Scope {
       return bestMatch;
     }
 
-    throw new ExecutionErrorException(FunctionDiagnostics.buildError(name,
-        overloads, args));
+    return null;
   }
 
-  public FunctionValue resolveFunction(
+  public FunctionValue getFunction(
       List<FunctionValue> overloads,
       Value... args) {
 
@@ -226,8 +221,7 @@ public final class Scope {
       return bestMatch;
     }
 
-    throw new ExecutionErrorException(
-        FunctionDiagnostics.buildError("", overloads, args));
+    return null;
   }
 
   // HELPER CLASSES
@@ -313,27 +307,6 @@ public final class Scope {
 
   private static final class FunctionDiagnostics {
 
-    static String buildError(
-        String name,
-        List<FunctionValue> overloads,
-        Value[] args) {
-
-      String received = Arrays.stream(args)
-          .map(v -> v.type().friendly())
-          .collect(Collectors.joining(", "));
-
-      String available = overloads.stream()
-          .map(fn -> formatSignature(name, fn))
-          .collect(Collectors.joining("\n  - ", "\n  - ", ""));
-
-      return """
-          No matching overload for function '%s(%s)'.
-
-          Available overloads:%s
-          """
-          .formatted(name, received, available);
-    }
-
     static String buildFunctionNotFoundError(
         String name,
         FunctionValue fn,
@@ -363,27 +336,47 @@ public final class Scope {
           ? "%s(%s...)".formatted(fn.name(), params)
           : "%s(%s)".formatted(fn.name(), params);
     }
+    // static String buildError(
+    // String name,
+    // List<FunctionValue> overloads,
+    // Value[] args) {
 
-    static String formatSignature(String name, FunctionValue fn) {
+    // String received = Arrays.stream(args)
+    // .map(v -> v.type().friendly())
+    // .collect(Collectors.joining(", "));
 
-      ValueType[] params = fn.parameters();
+    // String available = overloads.stream()
+    // .map(fn -> formatSignature(name, fn))
+    // .collect(Collectors.joining("\n - ", "\n - ", ""));
 
-      List<String> parts = new ArrayList<>();
+    // return """
+    // No matching overload for function '%s(%s)'.
 
-      for (int i = 0; i < params.length; i++) {
+    // Available overloads:%s
+    // """
+    // .formatted(name, received, available);
+    // }
 
-        String type = params[i].friendly();
+    // static String formatSignature(String name, FunctionValue fn) {
 
-        if (fn.isVarArgs() && i == params.length - 1) {
-          type += "...";
-        }
+    // ValueType[] params = fn.parameters();
 
-        parts.add(type);
-      }
+    // List<String> parts = new ArrayList<>();
 
-      return "%s(%s)"
-          .formatted(name, String.join(", ", parts));
-    }
+    // for (int i = 0; i < params.length; i++) {
+
+    // String type = params[i].friendly();
+
+    // if (fn.isVarArgs() && i == params.length - 1) {
+    // type += "...";
+    // }
+
+    // parts.add(type);
+    // }
+
+    // return "%s(%s)"
+    // .formatted(name, String.join(", ", parts));
+    // }
   }
 
 }

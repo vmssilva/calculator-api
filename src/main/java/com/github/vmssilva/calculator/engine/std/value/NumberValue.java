@@ -1,8 +1,9 @@
 package com.github.vmssilva.calculator.engine.std.value;
 
 import java.math.BigDecimal;
-import com.github.vmssilva.calculator.engine.utils.MathFunctions;
-import com.github.vmssilva.calculator.engine.utils.NumericOperations;
+
+import com.github.vmssilva.calculator.engine.core.lang.math.MathOperations;
+import com.github.vmssilva.calculator.engine.core.lang.math.NumericOperations;
 
 public interface NumberValue<T extends Number> extends Value<T> {
 
@@ -63,7 +64,7 @@ public interface NumberValue<T extends Number> extends Value<T> {
   }
 
   default NumberValue<?> pow(NumberValue<?> exp) {
-    return MathFunctions.pow(this, exp);
+    return MathOperations.pow(this, exp);
   }
 
   // =========================
@@ -71,11 +72,11 @@ public interface NumberValue<T extends Number> extends Value<T> {
   // =========================
 
   default NumberValue<?> abs() {
-    return MathFunctions.abs(this);
+    return MathOperations.abs(this);
   }
 
   default boolean isNegative() {
-    return MathFunctions.isNegative(this);
+    return MathOperations.isNegative(this);
   }
 
   // =========================

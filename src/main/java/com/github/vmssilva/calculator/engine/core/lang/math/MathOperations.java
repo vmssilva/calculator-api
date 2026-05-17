@@ -1,4 +1,4 @@
-package com.github.vmssilva.calculator.engine.utils;
+package com.github.vmssilva.calculator.engine.core.lang.math;
 
 import java.math.BigDecimal;
 
@@ -10,9 +10,9 @@ import com.github.vmssilva.calculator.engine.std.value.IntValue;
 import com.github.vmssilva.calculator.engine.std.value.LongValue;
 import com.github.vmssilva.calculator.engine.std.value.NumberValue;
 
-public class MathFunctions {
+public class MathOperations {
 
-  private MathFunctions() {
+  private MathOperations() {
   }
 
   public static NumberValue<?> pow(NumberValue<?> x, NumberValue<?> y) {

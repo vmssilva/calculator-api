@@ -6,6 +6,7 @@ import com.github.vmssilva.calculator.engine.std.value.DoubleValue;
 import com.github.vmssilva.calculator.engine.std.value.IntValue;
 import com.github.vmssilva.calculator.engine.std.value.ListValue;
 import com.github.vmssilva.calculator.engine.std.value.LongValue;
+import com.github.vmssilva.calculator.engine.std.value.ModuleValue;
 import com.github.vmssilva.calculator.engine.std.value.NumberValue;
 import com.github.vmssilva.calculator.engine.std.value.StringValue;
 import com.github.vmssilva.calculator.engine.std.value.UnitValue;
@@ -22,7 +23,8 @@ public enum ValueType {
   INT(IntValue.class, "Int", 1),
   LONG(LongValue.class, "Long", 2),
   DOUBLE(DoubleValue.class, "Double", 3),
-  DECIMAL(DecimalValue.class, "Decimal", 4);
+  DECIMAL(DecimalValue.class, "Decimal", 4),
+  MODULE(ModuleValue.class, "Module", 0);
 
   private String value;
   private final Class<?> javaType;

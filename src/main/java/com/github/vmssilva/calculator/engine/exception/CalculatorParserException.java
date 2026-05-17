@@ -12,7 +12,12 @@ public class CalculatorParserException extends RuntimeException {
   }
 
   public CalculatorParserException(String message) {
-    super("ParserError: " + message);
+    super(message);
+  }
+
+  @Override
+  public String getMessage() {
+    return super.getMessage();
   }
 
   public int getLine() {

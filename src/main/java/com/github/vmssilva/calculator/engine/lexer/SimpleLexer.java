@@ -45,6 +45,12 @@ public final class SimpleLexer implements Lexer {
       return;
     }
 
+    if (c == '.') {
+      addToken(TokenType.DOT, String.valueOf(c));
+      advance();
+      return;
+    }
+
     if (c == '(') {
       addToken(TokenType.LPAREN, String.valueOf(c));
       advance();
