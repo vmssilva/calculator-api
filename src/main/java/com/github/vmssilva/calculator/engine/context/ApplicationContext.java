@@ -154,7 +154,7 @@ public class ApplicationContext implements ContextCapabilities {
 
     List<FunctionValue> overloads = new ArrayList<>();
 
-    var funcs = value.getClass().getDeclaredMethods();
+    var funcs = value.getClass().getMethods();
 
     for (Method m : funcs) {
 
@@ -179,7 +179,7 @@ public class ApplicationContext implements ContextCapabilities {
       @Override
       public Value call(ApplicationContext contex, Value... _arg) {
         try {
-          return (Value) method.invoke(target, (Object) args);
+          return (Value) method.invoke(target, (Object[]) args);
         } catch (IllegalAccessException | InvocationTargetException e) {
           throw new ExecutionErrorException("");
         }

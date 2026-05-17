@@ -6,10 +6,6 @@ import com.github.vmssilva.calculator.engine.std.type.ValueType;
 
 public record IntValue(Integer value) implements NumberValue<Integer> {
 
-  public NumberValue<?> add(Value... args) {
-    return new IntValue(3);
-  }
-
   @Override
   public final String toString() {
     return value.toString();

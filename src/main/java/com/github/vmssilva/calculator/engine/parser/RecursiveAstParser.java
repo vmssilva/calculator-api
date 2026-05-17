@@ -280,49 +280,61 @@ public final class RecursiveAstParser implements Parser {
 
   private Node parseCall(Node callee) {
 
-    List<Node> args = new ArrayList<>();
-
-    Node prop = null;
-
     while (true) {
 
       // =========================
-      // FUNCTION CALL
+      // MEMBER ACCESS
+      // foo.bar
       // =========================
-      if (match(TokenType.LPAREN)) {
+      if (match(TokenType.DOT)) {
 
         advance();
 
-        args = parseArguments();
+        expect(TokenType.IDENTIFIER);
 
-        expect(TokenType.RPAREN);
-        advance();
+        Node prop = new IdentifierNode(
+            advance().value());
 
         callee = new FunctionCallNode(
             callee,
             prop,
-            args);
+            List.of());
 
         continue;
       }
 
       // =========================
-      // MEMBER ACCESS / MODULE / PROPERTY
+      // FUNCTION CALL
+      // foo(...)
+      // foo.bar(...)
       // =========================
-      if (match(TokenType.DOT)) {
+      if (match(TokenType.LPAREN)) {
+
         advance();
-        expect(TokenType.IDENTIFIER);
 
-        prop = new IdentifierNode(advance().value());
+        List<Node> args = parseArguments();
 
-        // Token identifier = advance();
+        expect(TokenType.RPAREN);
 
-        // prop = new IdentifierNode(identifier.value());
+        advance();
 
-        // Node access = new FunctionCallNode(
-        // callee, prop, args);
+        // transforma access em call
+        if (callee instanceof FunctionCallNode fn
+            && fn.property() != null
+            && fn.args().isEmpty()) {
 
-        // callee = access;
+          callee = new FunctionCallNode(
+              fn.module(),
+              fn.property(),
+              args);
+
+        } else {
+
+          callee = new FunctionCallNode(
+              callee,
+              null,
+              args);
+        }
 
         continue;
       }
