@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.github.vmssilva.calculator.engine.core.annotations.Expose;
+import com.github.vmssilva.calculator.engine.core.annotations.Hidden;
 import com.github.vmssilva.calculator.engine.core.lang.math.MathOperations;
 import com.github.vmssilva.calculator.engine.core.module.ModuleReference;
 import com.github.vmssilva.calculator.engine.exception.ExecutionErrorException;
@@ -255,7 +257,44 @@ public class ApplicationContext implements ContextCapabilities {
 
     List<FunctionValue> overloads = new ArrayList<>();
 
+    var moduleExpose = type.isAnnotationPresent(Expose.class);
+    var moduleHidden = type.isAnnotationPresent(Hidden.class);
+
     for (Method m : type.getMethods()) {
+
+      var methodExpose = m.isAnnotationPresent(Expose.class);
+      var methodHidden = m.isAnnotationPresent(Hidden.class);
+
+      // ======================================================
+      // METHOD HIDDEN SEMPRE GANHA
+      // ======================================================
+      if (methodHidden) {
+        continue;
+      }
+
+      // ======================================================
+      // MODULE HIDDEN
+      // apenas métodos explicitamente expostos
+      // ======================================================
+      if (moduleHidden && !methodExpose) {
+        continue;
+      }
+
+      // ======================================================
+      // MODULE EXPOSED
+      // tudo liberado exceto @Hidden
+      // ======================================================
+      if (moduleExpose) {
+        // permitido
+      }
+
+      // ======================================================
+      // SEM ANNOTATION NO MODULE
+      // apenas métodos explicitamente expostos
+      // ======================================================
+      else if (!methodExpose) {
+        continue;
+      }
 
       // =========================
       // apenas static

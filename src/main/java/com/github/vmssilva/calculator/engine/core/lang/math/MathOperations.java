@@ -2,6 +2,7 @@ package com.github.vmssilva.calculator.engine.core.lang.math;
 
 import java.math.BigDecimal;
 
+import com.github.vmssilva.calculator.engine.core.annotations.Expose;
 import com.github.vmssilva.calculator.engine.exception.ValueErrorException;
 import com.github.vmssilva.calculator.engine.std.type.ValueType;
 import com.github.vmssilva.calculator.engine.std.value.DecimalValue;
@@ -10,6 +11,7 @@ import com.github.vmssilva.calculator.engine.std.value.IntValue;
 import com.github.vmssilva.calculator.engine.std.value.LongValue;
 import com.github.vmssilva.calculator.engine.std.value.NumberValue;
 
+@Expose
 public class MathOperations {
 
   private MathOperations() {
