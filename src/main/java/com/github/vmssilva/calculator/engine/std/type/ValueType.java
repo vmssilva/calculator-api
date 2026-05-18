@@ -11,6 +11,7 @@ import com.github.vmssilva.calculator.engine.std.value.NumberValue;
 import com.github.vmssilva.calculator.engine.std.value.StringValue;
 import com.github.vmssilva.calculator.engine.std.value.UnitValue;
 import com.github.vmssilva.calculator.engine.std.value.Value;
+import com.sun.jdi.BooleanValue;
 
 public enum ValueType {
   FUNCTION(FunctionValue.class, "Function", 0),
@@ -24,7 +25,8 @@ public enum ValueType {
   LONG(LongValue.class, "Long", 2),
   DOUBLE(DoubleValue.class, "Double", 3),
   DECIMAL(DecimalValue.class, "Decimal", 4),
-  MODULE(ModuleValue.class, "Module", 0);
+  MODULE(ModuleValue.class, "Module", 0),
+  BOOLEAN(BooleanValue.class, "Boolean", 0);
 
   private String value;
   private final Class<?> javaType;

@@ -9,6 +9,7 @@ import com.github.vmssilva.calculator.engine.ast.IdentifierNode;
 import com.github.vmssilva.calculator.engine.ast.LambdaNode;
 import com.github.vmssilva.calculator.engine.ast.Node;
 import com.github.vmssilva.calculator.engine.ast.ProgramNode;
+import com.github.vmssilva.calculator.engine.ast.PropertyAccessorNode;
 import com.github.vmssilva.calculator.engine.ast.StringNode;
 import com.github.vmssilva.calculator.engine.ast.VarNode;
 import com.github.vmssilva.calculator.engine.ast.BinaryNode;
@@ -126,20 +127,19 @@ public final class RecursiveAstParser implements Parser {
     return left;
   }
 
-  private Node factor() {
+  private Node unary() {
 
-    // 1. unary
     if (match(TokenType.PLUS, TokenType.MINUS)) {
       String op = advance().value();
-
-      if (isOperator()) {
-        syntaxError(line, pos);
-      }
-
-      return new UnaryNode(op, factor());
+      return new UnaryNode(op, unary());
     }
 
-    // 2. grouping OR lambda
+    return primary();
+  }
+
+  private Node primary() {
+
+    // grouping OR lambda start
     if (match(TokenType.LPAREN)) {
       advance();
 
@@ -157,8 +157,6 @@ public final class RecursiveAstParser implements Parser {
       expect(TokenType.RPAREN);
       advance();
 
-      Node body = null;
-
       // lambda
       if (match(TokenType.ARROW)) {
         advance();
@@ -166,47 +164,81 @@ public final class RecursiveAstParser implements Parser {
         List<String> params = parts.stream()
             .map(n -> {
               if (!(n instanceof IdentifierNode id)) {
-                throw new CalculatorParserException("Invalid lambda parameter", line, pos);
+                throw new CalculatorParserException(
+                    "Invalid lambda parameter",
+                    line,
+                    pos);
               }
               return id.name();
             })
             .toList();
 
-        body = expression();
+        Node body = expression();
 
-        Node lambda = new LambdaNode(params, body);
-
-        System.out.println(lambda);
-
-        return parseCall(lambda);
-
+        return new LambdaNode(params, body);
       }
 
       // grouping
       if (parts.size() == 1) {
-        return parseCall(parts.get(0));
+        return parts.get(0);
       }
-      throw new CalculatorParserException("Invalid grouped expression", line, pos);
+
+      throw new CalculatorParserException(
+          "Invalid grouped expression",
+          line,
+          pos);
     }
 
-    // 4. identifier
-    if (match(TokenType.IDENTIFIER)) {
-      Node id = new IdentifierNode(advance().value());
-      return parseCall(id);
-    }
-
-    // 5. number
+    // number
     if (match(TokenType.NUMBER)) {
-      // return new NumberNode(new BigDecimal(advance().value()));
-      var number = parseNumber(advance().value());
-      return new NumberNode(number);
+      return new NumberNode(parseNumber(advance().value()));
     }
 
+    // string
     if (match(TokenType.STRING)) {
       return new StringNode(advance().value());
     }
 
-    throw new CalculatorParserException("Unexpected token in factor", line, pos);
+    // identifier
+    if (match(TokenType.IDENTIFIER)) {
+      return new IdentifierNode(advance().value());
+    }
+
+    throw new CalculatorParserException(
+        "Unexpected token in primary",
+        line,
+        pos);
+  }
+
+  private Node factor() {
+
+    Node node = unary();
+
+    while (true) {
+
+      // function call
+      if (match(TokenType.LPAREN)) {
+        node = parseCall(node);
+        continue;
+      }
+
+      // property access
+      if (match(TokenType.DOT)) {
+        advance();
+
+        if (!match(TokenType.IDENTIFIER)) {
+          throw new CalculatorParserException("Expected identifier", line, pos);
+        }
+
+        String name = advance().value();
+        node = new PropertyAccessorNode(node, new IdentifierNode(name));
+        continue;
+      }
+
+      break;
+    }
+
+    return node;
   }
 
   private NumberValue parseNumber(String raw) {
@@ -260,7 +292,7 @@ public final class RecursiveAstParser implements Parser {
 
       // case 2: function definition (syntactic sugar)
       if (left instanceof FunctionCallNode call &&
-          call.property() instanceof IdentifierNode fn &&
+          call.target() instanceof IdentifierNode fn &&
           call.args().stream().allMatch(arg -> arg instanceof IdentifierNode)) {
 
         List<String> params = call.args().stream()
@@ -295,10 +327,12 @@ public final class RecursiveAstParser implements Parser {
         Node prop = new IdentifierNode(
             advance().value());
 
-        callee = new FunctionCallNode(
-            callee,
-            prop,
-            List.of());
+        // callee = new FunctionCallNode(
+        // callee,
+        // prop,
+        // List.of());
+        //
+        callee = new PropertyAccessorNode(callee, prop);
 
         continue;
       }
@@ -318,22 +352,10 @@ public final class RecursiveAstParser implements Parser {
 
         advance();
 
-        // transforma access em call
-        if (callee instanceof FunctionCallNode fn
-            && fn.property() != null
-            && fn.args().isEmpty()) {
-
-          callee = new FunctionCallNode(
-              fn.module(),
-              fn.property(),
-              args);
-
+        if (callee instanceof PropertyAccessorNode accessor) {
+          callee = new FunctionCallNode(accessor, args);
         } else {
-
-          callee = new FunctionCallNode(
-              callee,
-              null,
-              args);
+          callee = new FunctionCallNode(callee, args);
         }
 
         continue;

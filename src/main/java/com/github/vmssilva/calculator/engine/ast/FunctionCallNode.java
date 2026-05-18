@@ -3,32 +3,32 @@ package com.github.vmssilva.calculator.engine.ast;
 import java.util.List;
 
 import com.github.vmssilva.calculator.engine.context.ApplicationContext;
+import com.github.vmssilva.calculator.engine.context.Dispatcher;
 import com.github.vmssilva.calculator.engine.exception.ExecutionErrorException;
 import com.github.vmssilva.calculator.engine.std.value.FunctionValue;
 import com.github.vmssilva.calculator.engine.std.value.Value;
 
-public record FunctionCallNode(Node module, Node property, List<Node> args) implements Node {
+public record FunctionCallNode(Node target, List<Node> args) implements Node {
 
   @Override
   public Value interpret(ApplicationContext context) {
 
+    Dispatcher dispatcher = new Dispatcher();
     Value[] evaluated = new Value[args.size()];
 
     for (int i = 0; i < args.size(); i++) {
       evaluated[i] = args.get(i).interpret(context);
     }
 
-    if (property instanceof IdentifierNode prop) {
-      Value mod = module.interpret(context);
-      return context.resolve(mod, prop.name(), evaluated);
-    }
+    if (target instanceof PropertyAccessorNode accessor &&
+        accessor.property() instanceof IdentifierNode property) {
 
-    if (module instanceof IdentifierNode id) {
-      return context.resolve(id.name(), evaluated);
+      Value value = accessor.target().interpret(context);
+      return dispatcher.dispatch(context, value, property.name(), evaluated);
     }
 
     // Call
-    Value value = module.interpret(context);
+    Value value = target.interpret(context);
 
     if (value instanceof FunctionValue fn) {
       return fn.call(context, evaluated);
@@ -42,7 +42,7 @@ public record FunctionCallNode(Node module, Node property, List<Node> args) impl
   public final String toString() {
     StringBuilder repr = new StringBuilder();
 
-    repr.append(module).append("(");
+    repr.append(target).append("(");
     for (int i = 0; i < args.size(); i++) {
       if (args.isEmpty())
         break;

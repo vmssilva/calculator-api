@@ -1,5 +1,6 @@
 package com.github.vmssilva.calculator.engine.ast;
 
+import java.util.Arrays;
 import java.util.List;
 
 import com.github.vmssilva.calculator.engine.context.ApplicationContext;
@@ -68,9 +69,10 @@ public record LambdaNode(List<String> params, Node body) implements Node {
 
       @Override
       public ValueType[] parameters() {
-        return params.stream()
-            .map(p -> p)
-            .toArray(ValueType[]::new);
+        ValueType[] types = new ValueType[params.size()];
+        Arrays.fill(types, ValueType.ANY);
+
+        return types;
       }
 
     };

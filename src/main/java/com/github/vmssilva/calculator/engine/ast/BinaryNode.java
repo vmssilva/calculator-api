@@ -1,6 +1,7 @@
 package com.github.vmssilva.calculator.engine.ast;
 
 import com.github.vmssilva.calculator.engine.context.ApplicationContext;
+import com.github.vmssilva.calculator.engine.context.Dispatcher;
 import com.github.vmssilva.calculator.engine.exception.ExecutionErrorException;
 import com.github.vmssilva.calculator.engine.std.value.DecimalValue;
 import com.github.vmssilva.calculator.engine.std.value.DoubleValue;
@@ -31,7 +32,10 @@ public record BinaryNode(Node _left, Node _right, String operator) implements No
   }
 
   private Value call(ApplicationContext context, String name, Value a, Value b) {
-    return context.resolve(name, new Value[] { a, b });
+
+    Dispatcher dispatcher = new Dispatcher();
+    return dispatcher.dispatch(context, name, new Value[] { a, b });
+    // return context.resolve(name, new Value[] { a, b });
   }
 
   private Value add(Value left, Value right) {
