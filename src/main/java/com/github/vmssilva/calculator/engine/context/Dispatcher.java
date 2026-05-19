@@ -28,4 +28,15 @@ public class Dispatcher {
     return fn.call(context, values);
   }
 
+  public Value dispatch(
+      ApplicationContext ctx,
+      FunctionValue fn,
+      Value... args) {
+
+    FunctionValue resolved = resolver.resolve(
+        List.of(fn),
+        args);
+
+    return resolved.call(ctx, args);
+  }
 }

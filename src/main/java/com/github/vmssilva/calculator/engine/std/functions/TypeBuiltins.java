@@ -13,17 +13,17 @@ public class TypeBuiltins {
 
   @Builtin(name = "int")
   public static Value intValue(ApplicationContext context, NumberValue<?> v) {
-    return v.toInt();
+    return v.intValue();
   }
 
   @Builtin(name = "double")
   public static Value doubleValue(ApplicationContext context, NumberValue<?> v) {
-    return v.toDouble();
+    return v.doubleValue();
   }
 
   @Builtin(name = "decimal")
   public static Value decimalValue(ApplicationContext context, NumberValue<?> v) {
-    return v.toDecimal();
+    return v.decimalValue();
   }
 
   @Builtin(name = "str")

@@ -31,7 +31,7 @@ public record FunctionCallNode(Node target, List<Node> args) implements Node {
     Value value = target.interpret(context);
 
     if (value instanceof FunctionValue fn) {
-      return fn.call(context, evaluated);
+      return dispatcher.dispatch(context, fn, evaluated);
     }
 
     throw new ExecutionErrorException(

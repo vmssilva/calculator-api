@@ -2,7 +2,7 @@ package com.github.vmssilva.calculator.engine.std.value;
 
 import com.github.vmssilva.calculator.engine.std.type.ValueType;
 
-public record BooleanValue(Boolean bool) implements Value<Integer> {
+public record BooleanValue(Boolean bool) implements Value<Boolean> {
 
   @Override
   public ValueType type() {
@@ -10,7 +10,12 @@ public record BooleanValue(Boolean bool) implements Value<Integer> {
   }
 
   @Override
-  public Integer unwrap() {
-    return bool ? 1 : 0;
+  public Boolean unwrap() {
+    return bool;
+  }
+
+  @Override
+  public final String toString() {
+    return String.valueOf(bool);
   }
 }

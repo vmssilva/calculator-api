@@ -11,7 +11,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.github.vmssilva.calculator.engine.core.annotations.Expose;
+import com.github.vmssilva.calculator.engine.core.annotations.Module;
 import com.github.vmssilva.calculator.engine.core.lang.math.MathOperations;
+import com.github.vmssilva.calculator.engine.core.lang.number.Int;
 import com.github.vmssilva.calculator.engine.core.module.ModuleReference;
 import com.github.vmssilva.calculator.engine.exception.ExecutionErrorException;
 import com.github.vmssilva.calculator.engine.std.constants.Constants;
@@ -41,11 +44,21 @@ public class ApplicationContext implements ContextCapabilities {
     this.current = global;
 
     this.modules = new HashMap<>();
-    addModule("math", MathOperations.class);
+    addModule(MathOperations.class);
+    addModule(Int.class);
   }
 
-  private void addModule(String name, Class<?> clazz) {
-    modules.put(name, clazz);
+  public void addModule(Class<?> type) {
+
+    Module module = type.getAnnotation(Module.class);
+
+    if (module == null) {
+      throw new IllegalArgumentException(
+          "Missing @Module annotation: "
+              + type.getName());
+    }
+
+    modules.put(module.name(), type);
   }
 
   // =========================
@@ -83,6 +96,9 @@ public class ApplicationContext implements ContextCapabilities {
     // INSTANCE METHODS
     // =====================================
     for (Method m : receiver.getClass().getMethods()) {
+
+      if (!m.isAnnotationPresent(Expose.class))
+        continue;
 
       if (!m.getName().equals(method)) {
         continue;
@@ -306,6 +322,11 @@ public class ApplicationContext implements ContextCapabilities {
 
         try {
 
+          if (!method.isAnnotationPresent(Expose.class))
+            throw new ExecutionErrorException(
+                "Method '" + method.getName() +
+                    "' is not defined in type '" + target.type().friendly() + "'");
+
           return (Value) method.invoke(
               target,
               buildInvokeArgs(
@@ -375,6 +396,9 @@ public class ApplicationContext implements ContextCapabilities {
 
     for (Method m : type.getMethods()) {
 
+      if (!m.isAnnotationPresent(Expose.class))
+        continue;
+
       if (!Modifier.isStatic(m.getModifiers())) {
         continue;
       }
@@ -429,160 +453,5 @@ public class ApplicationContext implements ContextCapabilities {
 
     return args;
   }
-
-  // public Value resolve(String name, Value... args) {
-  // var funcs = current.getFunctions(name);
-
-  // if (funcs == null || funcs.isEmpty())
-  // throw new ExecutionErrorException("Function " + name + " is not defined");
-
-  // return resolve(funcs, args);
-  // }
-  // public Value resolve(List<FunctionValue> overloads, Value... args) {
-
-  // FunctionValue bestMatch = null;
-  // String name = "";
-
-  // if (overloads == null || overloads.isEmpty())
-  // throw new ExecutionErrorException("Target is not a function");
-
-  // name = overloads.get(0).name();
-
-  // for (FunctionValue fn : overloads) {
-
-  // if (!FunctionMatcher.matches(
-  // fn.parameters(),
-  // fn.isVarArgs(),
-  // args)) {
-  // continue;
-  // }
-
-  // if (bestMatch == null ||
-  // FunctionMatcher.isBetter(fn, bestMatch)) {
-  // bestMatch = fn;
-  // }
-  // }
-
-  // if (bestMatch != null) {
-  // return bestMatch.call(this, args);
-  // }
-
-  // throw buildError(name, overloads, args);
-
-  // }
-
-  // public Value resolve(Value value, String method, Value... args) {
-
-  // // =====================================
-  // // MODULE STATIC CALL
-  // // =====================================
-  // if (value instanceof ModuleReference module) {
-
-  // return resolveStatic(
-  // module.name(),
-  // module.clazz(),
-  // method,
-  // args);
-  // }
-
-  // List<FunctionValue> overloads = new ArrayList<>();
-
-  // // =====================================
-  // // INSTANCE METHODS
-  // // =====================================
-  // for (Method m : value.getClass().getMethods()) {
-
-  // if (!m.getName().equals(method)) {
-  // continue;
-  // }
-
-  // overloads.add(
-  // delegate(value, m));
-  // }
-
-  // // =====================================
-  // // no method
-  // // =====================================
-  // if (overloads.isEmpty()) {
-
-  // throw new ExecutionErrorException(
-  // "Method '" + method +
-  // "' is not defined for type '" +
-  // value.type().friendly() + "'");
-  // }
-
-  // return resolve(overloads, args);
-  // }
-
-  // private Value resolveStatic(String name, Class<?> type, String method,
-  // Value... args) {
-
-  // List<FunctionValue> overloads = new ArrayList<>();
-
-  // for (Method m : type.getMethods()) {
-
-  // if (!Modifier.isStatic(m.getModifiers())) {
-  // continue;
-  // }
-
-  // if (!m.getName().equals(method)) {
-  // continue;
-  // }
-
-  // overloads.add(delegate(null, m));
-  // }
-
-  // if (overloads.isEmpty()) {
-
-  // throw new ExecutionErrorException(
-  // "Method '" + method +
-  // "' is not defined in module '" +
-  // name + "'");
-  // }
-
-  // return resolve(overloads, args);
-  // }
-
-  // static String formatSignature(String name, FunctionValue fn) {
-
-  // ValueType[] params = fn.parameters();
-
-  // List<String> parts = new ArrayList<>();
-
-  // for (int i = 0; i < params.length; i++) {
-
-  // String type = params[i].friendly();
-
-  // if (fn.isVarArgs() && i == params.length - 1) {
-  // type += "...";
-  // }
-
-  // parts.add(type);
-  // }
-
-  // return "%s(%s)"
-  // .formatted(name, String.join(", ", parts));
-  // }
-
-  // private ExecutionErrorException buildError(String name, List<FunctionValue>
-  // overloads, Value... args) {
-
-  // String received = Arrays.stream(args)
-  // .map(v -> v.type().friendly())
-  // .collect(Collectors.joining(", "));
-
-  // String available = overloads.stream()
-  // .map(fn -> formatSignature(fn.name(), fn))
-  // .collect(Collectors.joining("\n - ", "\n - ", ""));
-
-  // String message = """
-  // No matching overload for function '%s(%s)'.
-
-  // Available overloads:%s
-  // """
-  // .formatted(name, received, available);
-
-  // return new ExecutionErrorException(message);
-  // }
 
 }

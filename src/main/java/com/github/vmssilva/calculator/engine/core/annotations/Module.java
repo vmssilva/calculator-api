@@ -7,6 +7,6 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.TYPE, ElementType.METHOD })
-public @interface Expose {
-  String name() default "";
+public @interface Module {
+  String name();
 }

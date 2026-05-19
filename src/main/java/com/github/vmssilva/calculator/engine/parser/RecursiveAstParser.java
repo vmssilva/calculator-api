@@ -201,7 +201,7 @@ public final class RecursiveAstParser implements Parser {
 
     // identifier
     if (match(TokenType.IDENTIFIER)) {
-      return new IdentifierNode(advance().value());
+      return parseCall(new IdentifierNode(advance().value()));
     }
 
     throw new CalculatorParserException(
@@ -327,11 +327,6 @@ public final class RecursiveAstParser implements Parser {
         Node prop = new IdentifierNode(
             advance().value());
 
-        // callee = new FunctionCallNode(
-        // callee,
-        // prop,
-        // List.of());
-        //
         callee = new PropertyAccessorNode(callee, prop);
 
         continue;
@@ -360,11 +355,35 @@ public final class RecursiveAstParser implements Parser {
 
         continue;
       }
+      // =========================
+      // IMPLICIT CALL
+      // foo bar
+      // foo x + 1
+      // =========================
+      if (startsImplicitExpression() &&
+          (callee instanceof IdentifierNode || callee instanceof PropertyAccessorNode)) {
 
+        Node arg = expression();
+
+        callee = new FunctionCallNode(
+            callee,
+            List.of(arg));
+
+        continue;
+      }
       break;
     }
 
     return callee;
+  }
+
+  private boolean startsImplicitExpression() {
+    return !(isOperator()) && !(isAstEnd())
+        && !(check(TokenType.EQUAL, TokenType.COMMA, TokenType.SEMICOLON, TokenType.RPAREN, TokenType.DOT));
+  }
+
+  private boolean check(TokenType... types) {
+    return match(types);
   }
 
   private List<Node> parseArguments() {
